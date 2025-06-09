@@ -29,16 +29,16 @@ Landing page profissional para a marca de cerveja angolana CUCA.
 └── README.md                 # Este arquivo
 ```
 
-### Tecnologias utilizadas
+## Tecnologias utilizadas
 
-- React 18
-- TypeScript
-- Tailwind CSS
-- Framer Motion (animações)
+- React 18 + TypeScript
+- Express.js + PostgreSQL
+- Tailwind CSS + Framer Motion
 - Vite (build tool)
 - Wouter (roteamento)
+- Drizzle ORM
 
-### Desenvolvimento local
+## Desenvolvimento local
 
 ```bash
 npm install
@@ -46,3 +46,25 @@ npm run dev
 ```
 
 A aplicação estará disponível em `http://localhost:5000`
+
+## Deploy no Vercel
+
+O projeto está configurado para deploy automático no Vercel:
+
+1. **Conecte seu repositório** ao Vercel
+2. **Configure as variáveis de ambiente**:
+   - `DATABASE_URL` - URL do PostgreSQL
+   - `SESSION_SECRET` - Chave secreta para sessões
+   - `NODE_ENV=production`
+3. **Deploy automático** - O Vercel usará as configurações do `vercel.json`
+
+Consulte `VERCEL_DEPLOY_GUIDE.md` para instruções detalhadas.
+
+## Funcionalidades
+
+- Landing page responsiva da marca CUCA
+- Sistema de autenticação
+- Painel administrativo
+- Galeria de fotos dos fãs
+- Formulário de contato
+- Gestão de produtos e pedidos
