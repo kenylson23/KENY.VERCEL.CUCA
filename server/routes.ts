@@ -9,21 +9,40 @@ import {
   insertFanPhotoSchema 
 } from "@shared/schema";
 import { getSimpleSession, requireAuth, loginHandler, logoutHandler, getUserHandler, registerHandler } from "./simpleAuth";
+import { vercelLoginHandler, vercelLogoutHandler, vercelRequireAuth, vercelGetUserHandler, vercelRegisterHandler } from "./vercelAuth";
+import cookieParser from "cookie-parser";
 import { seedDatabase } from "./seed";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add cookie parser for JWT authentication
+  app.use(cookieParser());
+  
   // Initialize session middleware
   app.use(getSimpleSession());
   
   // Seed database on startup
   await seedDatabase();
 
-  // Auth routes
-  app.post('/api/auth/login', loginHandler);
-  app.post('/api/auth/register', registerHandler);
-  app.post('/api/auth/logout', logoutHandler);
-  app.get('/api/auth/user', getUserHandler);
+  // Detect environment and use appropriate auth handlers
+  const isVercel = process.env.VERCEL === '1';
+  console.log('Authentication mode:', isVercel ? 'JWT (Vercel)' : 'Session (Traditional)');
+
+  // Auth routes - use Vercel handlers if in Vercel environment
+  if (isVercel) {
+    app.post('/api/auth/login', vercelLoginHandler);
+    app.post('/api/auth/register', vercelRegisterHandler);
+    app.post('/api/auth/logout', vercelLogoutHandler);
+    app.get('/api/auth/user', vercelGetUserHandler);
+  } else {
+    app.post('/api/auth/login', loginHandler);
+    app.post('/api/auth/register', registerHandler);
+    app.post('/api/auth/logout', logoutHandler);
+    app.get('/api/auth/user', getUserHandler);
+  }
+
+  // Set the appropriate auth middleware based on environment
+  const authMiddleware = isVercel ? vercelRequireAuth : requireAuth;
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {

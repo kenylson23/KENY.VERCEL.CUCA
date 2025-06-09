@@ -13,10 +13,11 @@ const ADMIN_CREDENTIALS = {
 export function getSimpleSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const isProduction = process.env.NODE_ENV === 'production';
+  const isVercel = process.env.VERCEL === '1';
   
-  // Only use PostgreSQL session store if DATABASE_URL is available
+  // For Vercel deployments, use memory store to avoid connection issues
   let sessionStore;
-  if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL && !isVercel) {
     try {
       const pgStore = connectPg(session);
       sessionStore = new pgStore({
@@ -25,27 +26,50 @@ export function getSimpleSession() {
         ttl: sessionTtl,
         tableName: "sessions",
       });
+      console.log('Using PostgreSQL session store');
     } catch (error) {
-      console.warn('Failed to create PostgreSQL session store, falling back to memory store:', error);
-      sessionStore = undefined; // Will use default memory store
+      console.warn('Failed to create PostgreSQL session store, using memory store:', error);
+      sessionStore = undefined;
     }
+  } else {
+    console.log('Using memory session store (Vercel or no DATABASE_URL)');
   }
 
-  return session({
+  const sessionConfig = {
     secret: process.env.SESSION_SECRET || "cuca-admin-secret-key-2024",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    name: 'cuca.session',
     cookie: {
       httpOnly: true,
-      secure: isProduction, // Automatically true in production
-      sameSite: isProduction ? 'strict' : 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' as const : 'lax' as const,
       maxAge: sessionTtl,
+      domain: isVercel ? undefined : 'localhost',
     },
+  };
+
+  console.log('Session config:', {
+    isProduction,
+    isVercel,
+    secure: sessionConfig.cookie.secure,
+    sameSite: sessionConfig.cookie.sameSite,
+    domain: sessionConfig.cookie.domain
   });
+
+  return session(sessionConfig);
 }
 
 export const requireAuth: RequestHandler = (req, res, next) => {
+  console.log('Auth check:', {
+    hasSession: !!req.session,
+    sessionId: req.sessionID,
+    isAuthenticated: req.session ? (req.session as any).isAuthenticated : false,
+    cookies: req.headers.cookie,
+    userAgent: req.headers['user-agent']
+  });
+
   if (req.session && (req.session as any).isAuthenticated) {
     return next();
   }
@@ -228,6 +252,14 @@ export const registerHandler: RequestHandler = async (req, res) => {
 };
 
 export const getUserHandler: RequestHandler = (req, res) => {
+  console.log('Get user handler:', {
+    hasSession: !!req.session,
+    sessionId: req.sessionID,
+    isAuthenticated: req.session ? (req.session as any).isAuthenticated : false,
+    user: req.session ? (req.session as any).user : null,
+    cookies: req.headers.cookie
+  });
+
   if (req.session && (req.session as any).isAuthenticated) {
     res.json((req.session as any).user);
   } else {
