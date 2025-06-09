@@ -1,70 +1,80 @@
-# CUCA Beer - Landing Page
+# CUCA Beer - Professional Sales Landing Page
 
-Landing page profissional para a marca de cerveja angolana CUCA.
+A professional landing page for CUCA beer showcasing the brand's rich heritage through an interactive and dynamically animated React-based frontend.
 
-## Características
+## Features
 
-- Design responsivo com cores da marca CUCA (amarelo, vermelho, preto, branco)
-- Logotipo oficial da CUCA
-- Imagem de hero com latas douradas da CUCA
-- Slogan "Em Angola, cerveja é CUCA"
-- Seções: Hero, Produtos, História, Depoimentos, Contato
-- Formulário de contato integrado
-- Sistema de admin para gestão de conteúdo
-- Galeria de fotos dos fãs
+- Professional sales landing page for CUCA beer
+- Interactive product catalog
+- Customer management system
+- Order processing
+- Contact form with admin panel
+- Fan photo gallery with moderation
+- Analytics tracking
+- Admin dashboard
 
-## Estrutura do projeto
+## Technology Stack
 
+- **Frontend**: React with Framer Motion, Tailwind CSS
+- **Backend**: Express.js with TypeScript
+- **Database**: PostgreSQL (Neon)
+- **ORM**: Drizzle ORM
+- **Authentication**: Passport.js
+- **Deployment**: Vercel
+
+## Database Setup
+
+This project uses Neon PostgreSQL as the database. The schema includes:
+
+- Users and admin users
+- Product catalog
+- Order management
+- Contact messages
+- Analytics events
+- Fan photo gallery
+- Session storage
+
+## Environment Variables
+
+Create a `.env` file with:
+
+```env
+DATABASE_URL="postgresql://username:password@host:port/database?sslmode=require"
 ```
-├── client/
-│   ├── public/
-│   │   └── images/
-│   │       ├── cuca-hero.jpg   # Imagem de fundo do hero
-│   │       └── cuca-logo.png   # Logotipo oficial
-│   └── src/
-│       ├── components/         # Componentes React
-│       └── pages/             # Páginas da aplicação
-├── server/                    # Backend Express
-├── shared/                    # Schemas e tipos compartilhados
-└── README.md                 # Este arquivo
-```
 
-## Tecnologias utilizadas
+## Development
 
-- React 18 + TypeScript
-- Express.js + PostgreSQL
-- Tailwind CSS + Framer Motion
-- Vite (build tool)
-- Wouter (roteamento)
-- Drizzle ORM
-
-## Desenvolvimento local
-
+1. Install dependencies:
 ```bash
 npm install
+```
+
+2. Set up your database URL in `.env`
+
+3. Run database migrations:
+```bash
+npm run db:push
+```
+
+4. Start the development server:
+```bash
 npm run dev
 ```
 
-A aplicação estará disponível em `http://localhost:5000`
+## Deployment to Vercel
 
-## Deploy no Vercel
+1. Connect your repository to Vercel
+2. Add the `DATABASE_URL` environment variable in Vercel dashboard
+3. Deploy
 
-O projeto está configurado para deploy automático no Vercel:
+The project includes a `vercel.json` configuration file for proper deployment.
 
-1. **Conecte seu repositório** ao Vercel
-2. **Configure as variáveis de ambiente**:
-   - `DATABASE_URL` - URL do PostgreSQL
-   - `SESSION_SECRET` - Chave secreta para sessões
-   - `NODE_ENV=production`
-3. **Deploy automático** - O Vercel usará as configurações do `vercel.json`
+## Database Schema
 
-Consulte `VERCEL_DEPLOY_GUIDE.md` para instruções detalhadas.
-
-## Funcionalidades
-
-- Landing page responsiva da marca CUCA
-- Sistema de autenticação
-- Painel administrativo
-- Galeria de fotos dos fãs
-- Formulário de contato
-- Gestão de produtos e pedidos
+The application includes complete CRUD operations for:
+- Product management
+- User registration and authentication
+- Order processing
+- Contact message handling
+- Fan photo gallery with moderation
+- Analytics tracking
