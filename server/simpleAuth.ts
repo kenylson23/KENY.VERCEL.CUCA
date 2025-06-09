@@ -12,14 +12,24 @@ const ADMIN_CREDENTIALS = {
 
 export function getSimpleSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
+  const isProduction = process.env.NODE_ENV === 'production';
   
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+  // Only use PostgreSQL session store if DATABASE_URL is available
+  let sessionStore;
+  if (process.env.DATABASE_URL) {
+    try {
+      const pgStore = connectPg(session);
+      sessionStore = new pgStore({
+        conString: process.env.DATABASE_URL,
+        createTableIfMissing: false,
+        ttl: sessionTtl,
+        tableName: "sessions",
+      });
+    } catch (error) {
+      console.warn('Failed to create PostgreSQL session store, falling back to memory store:', error);
+      sessionStore = undefined; // Will use default memory store
+    }
+  }
 
   return session({
     secret: process.env.SESSION_SECRET || "cuca-admin-secret-key-2024",
@@ -28,7 +38,8 @@ export function getSimpleSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true in production with HTTPS
+      secure: isProduction, // Automatically true in production
+      sameSite: isProduction ? 'strict' : 'lax',
       maxAge: sessionTtl,
     },
   });
@@ -42,30 +53,37 @@ export const requireAuth: RequestHandler = (req, res, next) => {
 };
 
 export const loginHandler: RequestHandler = async (req, res) => {
-  const { username, password } = req.body;
-
-  // Check for admin login first
-  if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-    (req.session as any).isAuthenticated = true;
-    (req.session as any).user = {
-      id: "admin-1",
-      username: "admin",
-      email: "admin@cuca.ao",
-      firstName: "Admin",
-      lastName: "CUCA",
-      role: "admin"
-    };
-    
-    res.json({ 
-      success: true, 
-      message: "Login realizado com sucesso",
-      user: (req.session as any).user
-    });
-    return;
-  }
-
-  // Check for regular user login
   try {
+    const { username, password } = req.body;
+
+    // Validate input
+    if (!username || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Usuário e senha são obrigatórios" 
+      });
+    }
+
+    // Check for admin login first
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+      (req.session as any).isAuthenticated = true;
+      (req.session as any).user = {
+        id: "admin-1",
+        username: "admin",
+        email: "admin@cuca.ao",
+        firstName: "Admin",
+        lastName: "CUCA",
+        role: "admin"
+      };
+      
+      return res.json({ 
+        success: true, 
+        message: "Login realizado com sucesso",
+        user: (req.session as any).user
+      });
+    }
+
+    // Check for regular user login
     const user = await storage.getCustomerByUsername(username);
     
     if (!user) {
@@ -101,14 +119,14 @@ export const loginHandler: RequestHandler = async (req, res) => {
       role: "user"
     };
     
-    res.json({ 
+    return res.json({ 
       success: true, 
       message: "Login realizado com sucesso",
       user: (req.session as any).user
     });
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       success: false, 
       message: "Erro interno do servidor" 
     });
