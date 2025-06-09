@@ -139,7 +139,14 @@ export const vercelRequireAuth: RequestHandler = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    
+    // Simulate session structure for compatibility
+    (req as any).session = {
+      isAuthenticated: true,
+      user: decoded
+    };
     (req as any).user = decoded;
+    
     return next();
   } catch (error) {
     console.error("JWT verification failed:", error);
