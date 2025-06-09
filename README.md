@@ -64,7 +64,10 @@ npm run dev
 ## Deployment to Vercel
 
 1. Connect your repository to Vercel
-2. Add the `DATABASE_URL` environment variable in Vercel dashboard
+2. Add the `DATABASE_URL` environment variable in Vercel dashboard:
+   ```
+   postgresql://neondb_owner:npg_kUOnioGj1RP5@ep-lucky-cherry-a402q9v4-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+   ```
 3. Deploy
 
 The project includes a `vercel.json` configuration file for proper deployment.
