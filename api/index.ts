@@ -14,29 +14,13 @@ function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-// Static file serving for Vercel
-function setupStaticServing(app: express.Express) {
-  const distPath = path.resolve(process.cwd(), "dist", "public");
-  
-  if (fs.existsSync(distPath)) {
-    app.use(express.static(distPath));
-    
-    // Fall through to index.html for SPA routing
-    app.use("*", (_req, res) => {
-      const indexPath = path.resolve(distPath, "index.html");
-      if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
-      } else {
-        res.status(404).send("Not found");
-      }
-    });
-  }
-}
-
 const app = express();
+
+// Basic middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+// Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const reqPath = req.path;
@@ -67,9 +51,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Initialize routes and error handling
 (async () => {
   await registerRoutes(app);
 
+  // Error handling middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -80,8 +66,22 @@ app.use((req, res, next) => {
     console.error(err);
   });
 
-  // In production, serve static files
-  setupStaticServing(app);
+  // Static file serving for production
+  const distPath = path.resolve(process.cwd(), "dist", "public");
+  
+  if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    
+    // SPA fallback - serve index.html for all non-API routes
+    app.use("*", (_req, res) => {
+      const indexPath = path.resolve(distPath, "index.html");
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send("Not found");
+      }
+    });
+  }
 })();
 
 export default app;
