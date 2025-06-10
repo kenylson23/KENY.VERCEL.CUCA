@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import bcrypt from "bcrypt";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 
 // Simple admin credentials
 const ADMIN_CREDENTIALS = {

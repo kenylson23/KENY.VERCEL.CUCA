@@ -1,17 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { 
   insertContactMessageSchema,
   insertProductSchema,
   insertOrderSchema,
   insertAnalyticsEventSchema,
   insertFanPhotoSchema 
-} from "@shared/schema";
-import { getSimpleSession, requireAuth, loginHandler, logoutHandler, getUserHandler, registerHandler } from "./simpleAuth";
-import { vercelLoginHandler, vercelLogoutHandler, vercelRequireAuth, vercelGetUserHandler, vercelRegisterHandler } from "./vercelAuth";
+} from "../shared/schema.js";
+import { getSimpleSession, requireAuth, loginHandler, logoutHandler, getUserHandler, registerHandler } from "./simpleAuth.js";
+import { vercelLoginHandler, vercelLogoutHandler, vercelRequireAuth, vercelGetUserHandler, vercelRegisterHandler } from "./vercelAuth.js";
 import cookieParser from "cookie-parser";
-import { seedDatabase } from "./seed";
+import { seedDatabase } from "./seed.js";
 import { z } from "zod";
 import type { RequestHandler } from "express";
 
