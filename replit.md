@@ -30,10 +30,11 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 ## Key Components
 
 ### Authentication System
-- **Dual Mode**: Traditional session-based auth and JWT-based auth for serverless
-- **Admin Panel**: Secure admin authentication with role-based access
-- **Session Storage**: PostgreSQL-backed sessions with fallback to memory store
-- **Security**: Bcrypt password hashing, secure cookie settings, CSRF protection
+- **Primary**: Supabase Authentication with JWT tokens
+- **Admin Panel**: Role-based access control using Supabase user metadata
+- **Frontend**: React hooks with automatic token management
+- **Backend**: JWT verification middleware with Supabase service key
+- **Security**: Supabase handles password hashing, secure sessions, and token refresh
 
 ### Content Management
 - **Product Catalog**: Dynamic product showcase with image optimization
@@ -97,6 +98,7 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 
 - June 14, 2025: Initial setup with PostgreSQL/Neon database
 - June 14, 2025: Complete migration to Supabase database with postgres-js driver
+- June 14, 2025: Complete migration to Supabase authentication system replacing session-based auth
 
 ## User Preferences
 

@@ -10,7 +10,7 @@ export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [location] = useLocation();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     // Check for saved theme preference or default to 'light'
@@ -178,10 +178,7 @@ export default function Navigation() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button
-                    onClick={() => {
-                      fetch('/api/auth/logout', { method: 'POST' })
-                        .then(() => window.location.reload());
-                    }}
+                    onClick={() => logout.mutate()}
                     variant="outline"
                     className="border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
