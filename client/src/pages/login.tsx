@@ -36,6 +36,7 @@ export default function LoginPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
+        credentials: "include", // Incluir cookies para sessões
       });
       
       if (!response.ok) {
@@ -78,6 +79,7 @@ export default function LoginPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
+        credentials: "include", // Incluir cookies para sessões
       });
       
       if (!response.ok) {
