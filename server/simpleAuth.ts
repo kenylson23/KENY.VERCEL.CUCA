@@ -43,10 +43,10 @@ export function getSimpleSession() {
     name: 'cuca.session',
     cookie: {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' as const : 'lax' as const,
+      secure: false, // Desabilitado para desenvolvimento local
+      sameSite: 'lax' as const,
       maxAge: sessionTtl,
-      domain: isVercel ? undefined : 'localhost',
+      domain: undefined, // Remove restrição de domínio para funcionar em todas as origens
     },
   };
 
