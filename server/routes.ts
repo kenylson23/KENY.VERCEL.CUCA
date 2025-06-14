@@ -8,42 +8,34 @@ import {
   insertAnalyticsEventSchema,
   insertFanPhotoSchema 
 } from "../shared/schema.js";
-import { getSimpleSession, requireAuth, loginHandler, logoutHandler, getUserHandler, registerHandler } from "./simpleAuth.js";
-import { vercelLoginHandler, vercelLogoutHandler, vercelRequireAuth, vercelGetUserHandler, vercelRegisterHandler } from "./vercelAuth.js";
-import cookieParser from "cookie-parser";
+import { 
+  requireSupabaseAuth, 
+  requireAdminRole, 
+  getSupabaseUserHandler, 
+  supabaseLogoutHandler,
+  updateUserMetadataHandler,
+  listUsersHandler 
+} from "./supabaseAuth.js";
 import { seedDatabase } from "./seed.js";
 import { z } from "zod";
 import type { RequestHandler } from "express";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Add cookie parser for JWT authentication
-  app.use(cookieParser());
-  
-  // Initialize session middleware
-  app.use(getSimpleSession());
-  
   // Seed database on startup
   await seedDatabase();
 
-  // Detect environment and use appropriate auth handlers
-  const isVercel = process.env.VERCEL === '1';
-  console.log('Authentication mode:', isVercel ? 'JWT (Vercel)' : 'Session (Traditional)');
+  console.log('Authentication mode: Supabase');
 
-  // Auth routes - use Vercel handlers if in Vercel environment
-  if (isVercel) {
-    app.post('/api/auth/login', vercelLoginHandler);
-    app.post('/api/auth/register', vercelRegisterHandler);
-    app.post('/api/auth/logout', vercelLogoutHandler);
-    app.get('/api/auth/user', vercelGetUserHandler);
-  } else {
-    app.post('/api/auth/login', loginHandler);
-    app.post('/api/auth/register', registerHandler);
-    app.post('/api/auth/logout', logoutHandler);
-    app.get('/api/auth/user', getUserHandler);
-  }
+  // Supabase Auth routes
+  app.post('/api/auth/logout', supabaseLogoutHandler);
+  app.get('/api/auth/user', requireSupabaseAuth, getSupabaseUserHandler);
+  
+  // Admin user management routes
+  app.post('/api/admin/users/update-metadata', requireSupabaseAuth, requireAdminRole, updateUserMetadataHandler);
+  app.get('/api/admin/users', requireSupabaseAuth, requireAdminRole, listUsersHandler);
 
-  // Set the appropriate auth middleware based on environment
-  const authMiddleware: RequestHandler = isVercel ? vercelRequireAuth : requireAuth;
+  // Set Supabase auth middleware
+  const authMiddleware: RequestHandler = requireSupabaseAuth;
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
