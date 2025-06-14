@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 const Home = lazy(() => import("@/pages/home"));
 const PontosVenda = lazy(() => import("@/pages/pontos-venda"));
 const GaleriaFas = lazy(() => import("@/pages/galeria-fas"));
+const Login = lazy(() => import("@/pages/Login"));
 const AdminPanel = lazy(() => import("@/pages/admin"));
 const AdminGaleria = lazy(() => import("@/pages/admin-galeria"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
@@ -38,8 +39,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/pontos-venda" component={PontosVenda} />
         <Route path="/galeria-fas" component={GaleriaFas} />
-        <Route path="/login" component={lazy(() => import("@/pages/login"))} />
-        <Route path="/register" component={lazy(() => import("@/pages/register"))} />
+        <Route path="/login" component={Login} />
         <Route path="/admin" component={AdminPanel} />
         <Route path="/admin-galeria" component={AdminGaleria} />
         <Route path="/admin/galeria" component={AdminGaleria} />
