@@ -29,6 +29,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('Authentication mode: Supabase');
 
   // Supabase Auth routes
+  app.post('/api/auth/login', supabaseLoginHandler);
+  app.post('/api/auth/register', supabaseRegisterHandler);
   app.post('/api/auth/logout', supabaseLogoutHandler);
   app.get('/api/auth/user', requireSupabaseAuth, getSupabaseUserHandler);
   

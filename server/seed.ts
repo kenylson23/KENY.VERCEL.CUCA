@@ -1,5 +1,6 @@
 import { db } from "./db.js";
-import { products, adminUsers, contactMessages } from "../shared/schema.js";
+import { products, adminUsers, contactMessages, users } from "../shared/schema.js";
+import bcrypt from "bcrypt";
 
 export async function seedDatabase() {
   try {
@@ -75,6 +76,30 @@ export async function seedDatabase() {
         subject: "Sugestão de novo sabor",
         message: "Que tal criar uma versão da CUCA com sabor tropical? Seria um sucesso!",
         status: "unread",
+      }
+    ]).onConflictDoNothing();
+
+    // Seed test users with hashed passwords
+    const hashedPassword = await bcrypt.hash("123456", 10);
+    
+    await db.insert(users).values([
+      {
+        username: "usuario",
+        email: "usuario@cuca.ao",
+        password: hashedPassword,
+        firstName: "Usuário",
+        lastName: "Teste",
+        role: "user",
+        isActive: true,
+      },
+      {
+        username: "admin",
+        email: "admin@cuca.ao", 
+        password: hashedPassword,
+        firstName: "Admin",
+        lastName: "CUCA",
+        role: "admin",
+        isActive: true,
       }
     ]).onConflictDoNothing();
 
