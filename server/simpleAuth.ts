@@ -79,9 +79,11 @@ export const requireAuth: RequestHandler = (req, res, next) => {
 export const loginHandler: RequestHandler = async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log('Login attempt for user:', username);
 
     // Validate input
     if (!username || !password) {
+      console.log('Login failed: missing credentials');
       return res.status(400).json({ 
         success: false, 
         message: "Usuário e senha são obrigatórios" 
