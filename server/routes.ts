@@ -9,15 +9,13 @@ import {
   insertFanPhotoSchema 
 } from "../shared/schema.js";
 import { 
-  requireSupabaseAuth, 
-  requireAdminRole, 
-  getSupabaseUserHandler, 
-  supabaseLogoutHandler,
-  supabaseLoginHandler,
-  supabaseRegisterHandler,
-  updateUserMetadataHandler,
-  listUsersHandler 
-} from "./supabaseAuth.js";
+  jwtLoginHandler,
+  jwtRegisterHandler,
+  jwtLogoutHandler,
+  jwtGetUserHandler,
+  requireJWTAuth,
+  requireAdminJWT
+} from "./jwtAuth.js";
 import { seedDatabase } from "./seed.js";
 import { z } from "zod";
 import type { RequestHandler } from "express";
@@ -26,20 +24,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed database on startup
   await seedDatabase();
 
-  console.log('Authentication mode: Supabase');
+  console.log('Authentication mode: JWT');
 
-  // Supabase Auth routes
-  app.post('/api/auth/login', supabaseLoginHandler);
-  app.post('/api/auth/register', supabaseRegisterHandler);
-  app.post('/api/auth/logout', supabaseLogoutHandler);
-  app.get('/api/auth/user', requireSupabaseAuth, getSupabaseUserHandler);
-  
-  // Admin user management routes
-  app.post('/api/admin/users/update-metadata', requireSupabaseAuth, requireAdminRole, updateUserMetadataHandler);
-  app.get('/api/admin/users', requireSupabaseAuth, requireAdminRole, listUsersHandler);
+  // JWT Auth routes
+  app.post('/api/auth/login', jwtLoginHandler);
+  app.post('/api/auth/register', jwtRegisterHandler);
+  app.post('/api/auth/logout', jwtLogoutHandler);
+  app.get('/api/auth/user', requireJWTAuth, jwtGetUserHandler);
 
-  // Set Supabase auth middleware
-  const authMiddleware: RequestHandler = requireSupabaseAuth;
+  // Set JWT auth middleware
+  const authMiddleware: RequestHandler = requireJWTAuth;
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {

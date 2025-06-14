@@ -174,6 +174,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   firstName: true,
   lastName: true,
   phone: true,
+  role: true,
+  isActive: true,
 });
 
 export const insertContactMessageSchema = createInsertSchema(contactMessages).pick({

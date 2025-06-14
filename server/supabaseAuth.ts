@@ -152,32 +152,49 @@ export const supabaseLoginHandler: RequestHandler = async (req, res) => {
       });
     }
 
-    // Generate session tokens
-    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
-      type: 'magiclink',
-      email: user.email
+    // Create a session using signInWithPassword
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: password
     });
 
-    if (sessionError) {
-      console.error('Error generating session:', sessionError);
-      return res.status(500).json({
-        success: false,
-        message: 'Erro ao gerar sessão'
+    if (authError) {
+      console.error('Error creating Supabase session:', authError);
+      // Fallback: return user data without Supabase session
+      res.json({
+        success: true,
+        message: 'Login realizado com sucesso',
+        user: {
+          id: user.id.toString(),
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role || 'user'
+        },
+        session: null
       });
+      return;
     }
 
     res.json({
       success: true,
       message: 'Login realizado com sucesso',
       user: {
-        id: supabaseUser.id,
+        id: authData.user.id,
         email: user.email,
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role || 'user'
       },
-      session: sessionData
+      session: {
+        access_token: authData.session?.access_token,
+        refresh_token: authData.session?.refresh_token,
+        expires_in: authData.session?.expires_in,
+        token_type: authData.session?.token_type,
+        user: authData.user
+      }
     });
 
   } catch (error) {
