@@ -72,7 +72,7 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 - **esbuild**: Fast JavaScript bundler
 
 ### Cloud Services
-- **Neon**: PostgreSQL database hosting
+- **Supabase**: PostgreSQL database hosting with built-in auth and real-time features
 - **Vercel**: Serverless deployment platform
 
 ## Deployment Strategy
@@ -95,7 +95,8 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 
 ## Changelog
 
-- June 14, 2025. Initial setup
+- June 14, 2025: Initial setup with PostgreSQL/Neon database
+- June 14, 2025: Complete migration to Supabase database with postgres-js driver
 
 ## User Preferences
 
