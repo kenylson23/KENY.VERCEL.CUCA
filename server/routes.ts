@@ -262,12 +262,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const userId = (req.session as any).user?.id;
+      const userId = req.supabaseUser?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const photoData = { ...result.data, userId };
+      // Convert Supabase UUID to integer for database compatibility
+      const numericUserId = Math.abs(userId.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0)) % 2147483647;
+
+      const photoData = { ...result.data, userId: numericUserId };
       const photo = await storage.createFanPhoto(photoData);
       res.json({ success: true, message: "Foto enviada com sucesso! Aguardando aprovação.", photo });
     } catch (error) {
@@ -310,7 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/fan-gallery/:id/approve", authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const adminUser = (req.session as any).user?.username || "admin";
+      const adminUser = req.supabaseUser?.email || "admin";
       
       const photo = await storage.updateFanPhotoStatus(id, "approved", adminUser);
       res.json({ success: true, message: "Foto aprovada com sucesso!", photo });
@@ -323,7 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/fan-gallery/:id/reject", authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const adminUser = (req.session as any).user?.username || "admin";
+      const adminUser = req.supabaseUser?.email || "admin";
       
       const photo = await storage.updateFanPhotoStatus(id, "rejected", adminUser);
       res.json({ success: true, message: "Foto rejeitada com sucesso!", photo });
@@ -347,12 +353,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User photo routes (authenticated)
   app.get("/api/user/my-photos", authMiddleware, async (req, res) => {
     try {
-      const userId = (req.session as any).user?.id;
+      const userId = req.supabaseUser?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const photos = await storage.getUserPhotos(userId);
+      // Convert Supabase UUID to integer for database compatibility
+      const numericUserId = Math.abs(userId.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0)) % 2147483647;
+      
+      const photos = await storage.getUserPhotos(numericUserId);
       res.json(photos);
     } catch (error) {
       console.error("Error fetching user photos:", error);
