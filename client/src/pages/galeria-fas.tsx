@@ -46,9 +46,10 @@ export default function GaleriaFas() {
   });
 
   // Buscar minhas fotos enviadas
-  const { data: myPhotos = [] } = useQuery<FanPhoto[]>({
+  const { data: myPhotos = [], error: myPhotosError } = useQuery<FanPhoto[]>({
     queryKey: ["/api/user/my-photos"],
     enabled: isAuthenticated,
+    retry: false,
   });
 
   // Mutation para enviar nova foto
@@ -337,7 +338,7 @@ export default function GaleriaFas() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {myPhotos.length > 0 ? (
+                {myPhotos && myPhotos.length > 0 ? (
                   <div className="space-y-4 max-h-96 overflow-y-auto">
                     {myPhotos.map((photo) => (
                       <div key={photo.id} className="flex items-center gap-3 p-3 border rounded-lg">
