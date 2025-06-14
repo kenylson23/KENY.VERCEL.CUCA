@@ -260,18 +260,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const userId = req.supabaseUser?.id;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      // Convert Supabase UUID to integer for database compatibility
-      const numericUserId = Math.abs(userId.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a;
-      }, 0)) % 2147483647;
-
-      const photoData = { ...result.data, userId: numericUserId };
+      const photoData = { ...result.data, userId: typeof userId === 'string' ? parseInt(userId) : userId };
       const photo = await storage.createFanPhoto(photoData);
       res.json({ success: true, message: "Foto enviada com sucesso! Aguardando aprovação.", photo });
     } catch (error) {
@@ -351,18 +345,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User photo routes (authenticated)
   app.get("/api/user/my-photos", authMiddleware, async (req, res) => {
     try {
-      const userId = req.supabaseUser?.id;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      // Convert Supabase UUID to integer for database compatibility
-      const numericUserId = Math.abs(userId.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a;
-      }, 0)) % 2147483647;
-      
-      const photos = await storage.getUserPhotos(numericUserId);
+      const photos = await storage.getUserPhotos(parseInt(userId.toString()));
       res.json(photos);
     } catch (error) {
       console.error("Error fetching user photos:", error);
