@@ -22,10 +22,11 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 - **Middleware**: Custom logging, CORS, and authentication middleware
 
 ### Database Architecture
-- **Database**: PostgreSQL (using Supabase for cloud hosting)
+- **Database**: PostgreSQL (Supabase cloud hosting)
 - **ORM**: Drizzle ORM with type-safe schema definitions
 - **Migrations**: Drizzle Kit for schema management
 - **Connection**: postgres-js driver with SSL for Supabase compatibility
+- **Authentication**: Supabase Auth with JWT tokens
 
 ## Key Components
 
@@ -99,6 +100,7 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 - June 14, 2025: Initial setup with PostgreSQL/Neon database
 - June 14, 2025: Complete migration to Supabase database with postgres-js driver
 - June 14, 2025: Complete migration to Supabase authentication system replacing session-based auth
+- June 14, 2025: Migrated from Neon to Supabase database - removed all Neon dependencies and configured full Supabase integration
 
 ## User Preferences
 
