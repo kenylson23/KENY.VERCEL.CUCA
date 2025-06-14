@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from "../shared/schema.js";
 
 if (!process.env.DATABASE_URL) {
@@ -8,9 +8,10 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+// Create postgres connection for Supabase
+const client = postgres(process.env.DATABASE_URL, {
+  prepare: false,
+  ssl: 'require'
 });
 
-export const db = drizzle(pool, { schema });
+export const db = drizzle(client, { schema });

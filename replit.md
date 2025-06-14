@@ -22,10 +22,10 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 - **Middleware**: Custom logging, CORS, and authentication middleware
 
 ### Database Architecture
-- **Database**: PostgreSQL (using Neon for cloud hosting)
+- **Database**: PostgreSQL (using Supabase for cloud hosting)
 - **ORM**: Drizzle ORM with type-safe schema definitions
 - **Migrations**: Drizzle Kit for schema management
-- **Connection**: Connection pooling with SSL support for production
+- **Connection**: postgres-js driver with SSL for Supabase compatibility
 
 ## Key Components
 
