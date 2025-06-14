@@ -101,6 +101,7 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 - June 14, 2025: Complete migration to Supabase database with postgres-js driver
 - June 14, 2025: Complete migration to Supabase authentication system replacing session-based auth
 - June 14, 2025: Migrated from Neon to Supabase database - removed all Neon dependencies and configured full Supabase integration
+- June 14, 2025: Implemented hybrid authentication system - automatically detects Supabase configuration and falls back to JWT when needed
 
 ## User Preferences
 

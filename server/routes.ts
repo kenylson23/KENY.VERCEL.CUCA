@@ -32,16 +32,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed database on startup
   await seedDatabase();
 
-  console.log('Authentication mode: Supabase');
-
-  // Supabase Auth routes
-  app.post('/api/auth/login', supabaseLoginHandler);
-  app.post('/api/auth/register', supabaseRegisterHandler);
-  app.post('/api/auth/logout', supabaseLogoutHandler);
-  app.get('/api/auth/user', requireSupabaseAuth, getSupabaseUserHandler);
-
-  // Set Supabase auth middleware
-  const authMiddleware: RequestHandler = requireSupabaseAuth;
+  // Detect which authentication system to use
+  const useSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
+  if (useSupabase) {
+    console.log('Authentication mode: Supabase');
+    
+    // Supabase Auth routes
+    app.post('/api/auth/login', supabaseLoginHandler);
+    app.post('/api/auth/register', supabaseRegisterHandler);
+    app.post('/api/auth/logout', supabaseLogoutHandler);
+    app.get('/api/auth/user', requireSupabaseAuth, getSupabaseUserHandler);
+    
+    // Set Supabase auth middleware
+    var authMiddleware: RequestHandler = requireSupabaseAuth;
+  } else {
+    console.log('Authentication mode: JWT (Fallback)');
+    
+    // JWT Auth routes (fallback)
+    app.post('/api/auth/login', jwtLoginHandler);
+    app.post('/api/auth/register', jwtRegisterHandler);
+    app.post('/api/auth/logout', jwtLogoutHandler);
+    app.get('/api/auth/user', requireJWTAuth, jwtGetUserHandler);
+    
+    // Set JWT auth middleware
+    var authMiddleware: RequestHandler = requireJWTAuth;
+  }
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
@@ -268,17 +284,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const userId = req.supabaseUser?.id;
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+      // Get user ID based on authentication system
+      let dbUserId: number | null = null;
+      
+      if (useSupabase && req.supabaseUser) {
+        // For Supabase, map the Supabase user ID to our database user ID
+        const dbUser = await storage.getCustomerByUsername(req.supabaseUser.email || '');
+        dbUserId = dbUser ? dbUser.id : null;
+      } else if (req.user) {
+        // For JWT authentication
+        dbUserId = typeof req.user.id === 'string' ? parseInt(req.user.id) : req.user.id;
       }
-
-      // For Supabase, we need to map the Supabase user ID to our database user ID
-      const dbUser = await storage.getCustomerByUsername(req.supabaseUser?.email || '');
-      const dbUserId = dbUser ? dbUser.id : null;
       
       if (!dbUserId) {
-        return res.status(404).json({ message: "User not found in database" });
+        return res.status(401).json({ message: "User not found or unauthorized" });
       }
 
       const photoData = { ...result.data, userId: dbUserId };
@@ -324,7 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/fan-gallery/:id/approve", authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const adminUser = req.supabaseUser?.email || "admin";
+      const adminUser = useSupabase ? (req.supabaseUser?.email || "admin") : (req.user?.email || "admin");
       
       const photo = await storage.updateFanPhotoStatus(id, "approved", adminUser);
       res.json({ success: true, message: "Foto aprovada com sucesso!", photo });
@@ -337,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/fan-gallery/:id/reject", authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const adminUser = req.supabaseUser?.email || "admin";
+      const adminUser = useSupabase ? (req.supabaseUser?.email || "admin") : (req.user?.email || "admin");
       
       const photo = await storage.updateFanPhotoStatus(id, "rejected", adminUser);
       res.json({ success: true, message: "Foto rejeitada com sucesso!", photo });
