@@ -350,7 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const photos = await storage.getUserPhotos(parseInt(userId.toString()));
+      const photos = await storage.getUserPhotos(typeof userId === 'string' ? parseInt(userId) : userId);
       res.json(photos);
     } catch (error) {
       console.error("Error fetching user photos:", error);
