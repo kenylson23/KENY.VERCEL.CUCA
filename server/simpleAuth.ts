@@ -122,18 +122,24 @@ export const loginHandler: RequestHandler = async (req, res) => {
     }
 
     // Check for regular user login
+    console.log('Checking for regular user:', username);
     const user = await storage.getCustomerByUsername(username);
     
     if (!user) {
+      console.log('User not found:', username);
       return res.status(401).json({ 
         success: false, 
         message: "Usuário não encontrado" 
       });
     }
 
+    console.log('User found:', { id: user.id, username: user.username, email: user.email, isActive: user.isActive });
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Password validation result:', isPasswordValid);
     
     if (!isPasswordValid) {
+      console.log('Invalid password for user:', username);
       return res.status(401).json({ 
         success: false, 
         message: "Senha incorreta" 
@@ -141,11 +147,14 @@ export const loginHandler: RequestHandler = async (req, res) => {
     }
 
     if (!user.isActive) {
+      console.log('User account is inactive:', username);
       return res.status(401).json({ 
         success: false, 
         message: "Conta desativada" 
       });
     }
+
+    console.log('User login successful, creating session for:', username);
 
     (req.session as any).isAuthenticated = true;
     (req.session as any).user = {
