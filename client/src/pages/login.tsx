@@ -9,7 +9,7 @@ import { Link, useLocation } from 'wouter';
 import { LogIn, UserPlus } from 'lucide-react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login, isAuthenticated } = useAuth();
@@ -26,7 +26,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await login.mutateAsync({ email, password });
+      await login.mutateAsync({ username, password });
       setLocation('/admin');
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login');
@@ -54,13 +54,13 @@ export default function LoginPage() {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Usuário</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Seu nome de usuário"
                 required
               />
             </div>

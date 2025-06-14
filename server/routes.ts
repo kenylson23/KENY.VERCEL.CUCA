@@ -13,6 +13,8 @@ import {
   requireAdminRole, 
   getSupabaseUserHandler, 
   supabaseLogoutHandler,
+  supabaseLoginHandler,
+  supabaseRegisterHandler,
   updateUserMetadataHandler,
   listUsersHandler 
 } from "./supabaseAuth.js";

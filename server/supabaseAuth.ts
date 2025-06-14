@@ -79,6 +79,213 @@ export const getSupabaseUserHandler: RequestHandler = (req, res) => {
   });
 };
 
+// Custom login handler that supports username
+export const supabaseLoginHandler: RequestHandler = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Usuário e senha são obrigatórios'
+      });
+    }
+
+    // First, get user by username from our database
+    const { storage } = await import('./storage.js');
+    const user = await storage.getCustomerByUsername(username);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Usuário não encontrado'
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Conta desativada'
+      });
+    }
+
+    // Verify password using bcrypt
+    const bcrypt = await import('bcrypt');
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Senha incorreta'
+      });
+    }
+
+    // Create or get Supabase user by email
+    let supabaseUser;
+    try {
+      // Try to get existing user
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      supabaseUser = existingUsers.users.find(u => u.email === user.email);
+
+      if (!supabaseUser) {
+        // Create new Supabase user
+        const { data, error } = await supabase.auth.admin.createUser({
+          email: user.email,
+          password: password,
+          user_metadata: {
+            username: user.username,
+            first_name: user.firstName,
+            last_name: user.lastName,
+            role: user.role || 'user'
+          },
+          email_confirm: true
+        });
+
+        if (error) throw error;
+        supabaseUser = data.user;
+      }
+    } catch (error) {
+      console.error('Error managing Supabase user:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor'
+      });
+    }
+
+    // Generate session tokens
+    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: user.email
+    });
+
+    if (sessionError) {
+      console.error('Error generating session:', sessionError);
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao gerar sessão'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Login realizado com sucesso',
+      user: {
+        id: supabaseUser.id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role || 'user'
+      },
+      session: sessionData
+    });
+
+  } catch (error) {
+    console.error('Error in supabaseLoginHandler:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno do servidor'
+    });
+  }
+};
+
+// Register handler that creates both database and Supabase users
+export const supabaseRegisterHandler: RequestHandler = async (req, res) => {
+  try {
+    const { username, email, password, firstName, lastName } = req.body;
+
+    if (!username || !email || !password || !firstName || !lastName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Todos os campos são obrigatórios'
+      });
+    }
+
+    const { storage } = await import('./storage.js');
+    const bcrypt = await import('bcrypt');
+
+    // Check if username or email already exists
+    const existingUser = await storage.getCustomerByUsername(username);
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nome de usuário já está em uso'
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user in database
+    const newUser = await storage.createCustomer({
+      username,
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      role: 'user',
+      isActive: true
+    });
+
+    // Create user in Supabase
+    const { data, error } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      user_metadata: {
+        username,
+        first_name: firstName,
+        last_name: lastName,
+        role: 'user'
+      },
+      email_confirm: true
+    });
+
+    if (error) {
+      console.error('Error creating Supabase user:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao criar usuário no sistema de autenticação'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Conta criada com sucesso! Você já pode fazer login.',
+      user: {
+        id: data.user.id,
+        email: newUser.email,
+        username: newUser.username,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        role: newUser.role
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Error in supabaseRegisterHandler:', error);
+    
+    if (error.code === '23505') {
+      if (error.constraint?.includes('email')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email já está em uso'
+        });
+      }
+      if (error.constraint?.includes('username')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Nome de usuário já está em uso'
+        });
+      }
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno do servidor'
+    });
+  }
+};
+
 // Logout handler (client-side only with Supabase)
 export const supabaseLogoutHandler: RequestHandler = (req, res) => {
   res.json({

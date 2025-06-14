@@ -51,13 +51,33 @@ export function useAuth() {
   }, [queryClient]);
 
   const login = useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+    mutationFn: async ({ username, password }: { username: string; password: string }) => {
+      // Use custom backend login endpoint that supports username
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao fazer login');
+      }
+
+      const data = await response.json();
       
-      if (error) throw error;
+      // Sign in to Supabase with the returned session data
+      if (data.session) {
+        const { error } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        });
+        
+        if (error) throw error;
+      }
+      
       return data;
     },
     onSuccess: () => {
