@@ -451,7 +451,7 @@ export default function AdminPanel() {
                       <div key={i} className="bg-gray-200 dark:bg-gray-700 rounded-lg h-48 animate-pulse"></div>
                     ))}
                   </div>
-                ) : products.length > 0 ? (
+                ) : products && products.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {products.map((product) => (
                       <div key={product.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">

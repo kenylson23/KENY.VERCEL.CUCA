@@ -1,5 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { supabase } from "./supabase";
+import { AuthService } from "./auth";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -13,12 +13,12 @@ export async function apiRequest(
   method: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Get current session token
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get current JWT token
+  const token = AuthService.getToken();
   
   const headers: Record<string, string> = {
     ...(data ? { "Content-Type": "application/json" } : {}),
-    ...(session?.access_token ? { "Authorization": `Bearer ${session.access_token}` } : {})
+    ...(token ? { "Authorization": `Bearer ${token}` } : {})
   };
 
   const res = await fetch(url, {
@@ -37,11 +37,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Get current session token
-    const { data: { session } } = await supabase.auth.getSession();
+    // Get current JWT token
+    const token = AuthService.getToken();
     
     const headers: Record<string, string> = {
-      ...(session?.access_token ? { "Authorization": `Bearer ${session.access_token}` } : {})
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
     };
 
     const res = await fetch(queryKey[0] as string, {
