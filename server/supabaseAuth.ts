@@ -1,16 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 import type { RequestHandler } from 'express';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Initialize Supabase client with fallback check
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('Supabase variables not configured. Using fallback authentication.');
+}
+
+export const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
   }
-});
+}) : null;
 
 // Middleware to verify Supabase JWT token
 export const requireSupabaseAuth: RequestHandler = async (req, res, next) => {

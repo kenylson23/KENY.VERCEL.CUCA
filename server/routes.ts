@@ -9,6 +9,14 @@ import {
   insertFanPhotoSchema 
 } from "../shared/schema.js";
 import { 
+  supabaseLoginHandler,
+  supabaseRegisterHandler,
+  supabaseLogoutHandler,
+  getSupabaseUserHandler,
+  requireSupabaseAuth,
+  requireAdminRole
+} from "./supabaseAuth.js";
+import { 
   jwtLoginHandler,
   jwtRegisterHandler,
   jwtLogoutHandler,
@@ -24,16 +32,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed database on startup
   await seedDatabase();
 
-  console.log('Authentication mode: JWT');
+  console.log('Authentication mode: Supabase');
 
-  // JWT Auth routes
-  app.post('/api/auth/login', jwtLoginHandler);
-  app.post('/api/auth/register', jwtRegisterHandler);
-  app.post('/api/auth/logout', jwtLogoutHandler);
-  app.get('/api/auth/user', requireJWTAuth, jwtGetUserHandler);
+  // Supabase Auth routes
+  app.post('/api/auth/login', supabaseLoginHandler);
+  app.post('/api/auth/register', supabaseRegisterHandler);
+  app.post('/api/auth/logout', supabaseLogoutHandler);
+  app.get('/api/auth/user', requireSupabaseAuth, getSupabaseUserHandler);
 
-  // Set JWT auth middleware
-  const authMiddleware: RequestHandler = requireJWTAuth;
+  // Set Supabase auth middleware
+  const authMiddleware: RequestHandler = requireSupabaseAuth;
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
@@ -260,12 +268,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const userId = req.user?.id;
+      const userId = req.supabaseUser?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const photoData = { ...result.data, userId: typeof userId === 'string' ? parseInt(userId) : userId };
+      // For Supabase, we need to map the Supabase user ID to our database user ID
+      const dbUser = await storage.getCustomerByUsername(req.supabaseUser?.email || '');
+      const dbUserId = dbUser ? dbUser.id : null;
+      
+      if (!dbUserId) {
+        return res.status(404).json({ message: "User not found in database" });
+      }
+
+      const photoData = { ...result.data, userId: dbUserId };
       const photo = await storage.createFanPhoto(photoData);
       res.json({ success: true, message: "Foto enviada com sucesso! Aguardando aprovação.", photo });
     } catch (error) {
