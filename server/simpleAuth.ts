@@ -66,11 +66,11 @@ export const requireAuth: RequestHandler = (req, res, next) => {
     hasSession: !!req.session,
     sessionId: req.sessionID,
     isAuthenticated: req.session ? (req.session as any).isAuthenticated : false,
-    cookies: req.headers.cookie,
-    userAgent: req.headers['user-agent']
+    user: req.session ? (req.session as any).user : null,
+    cookies: req.headers.cookie
   });
 
-  if (req.session && (req.session as any).isAuthenticated) {
+  if (req.session && (req.session as any).isAuthenticated === true) {
     return next();
   }
   return res.status(401).json({ message: "Unauthorized" });
@@ -100,11 +100,23 @@ export const loginHandler: RequestHandler = async (req, res) => {
         role: "admin"
       };
       
-      return res.json({ 
-        success: true, 
-        message: "Login realizado com sucesso",
-        user: (req.session as any).user
+      // Salvar sessão explicitamente
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ 
+            success: false, 
+            message: "Erro ao salvar sessão" 
+          });
+        }
+        
+        return res.json({ 
+          success: true, 
+          message: "Login realizado com sucesso",
+          user: (req.session as any).user
+        });
       });
+      return;
     }
 
     // Check for regular user login
@@ -143,10 +155,21 @@ export const loginHandler: RequestHandler = async (req, res) => {
       role: "user"
     };
     
-    return res.json({ 
-      success: true, 
-      message: "Login realizado com sucesso",
-      user: (req.session as any).user
+    // Salvar sessão explicitamente
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ 
+          success: false, 
+          message: "Erro ao salvar sessão" 
+        });
+      }
+      
+      return res.json({ 
+        success: true, 
+        message: "Login realizado com sucesso",
+        user: (req.session as any).user
+      });
     });
   } catch (error) {
     console.error("Error during login:", error);
@@ -221,10 +244,21 @@ export const registerHandler: RequestHandler = async (req, res) => {
       role: "user"
     };
 
-    res.json({
-      success: true,
-      message: "Conta criada com sucesso",
-      user: (req.session as any).user
+    // Salvar sessão explicitamente
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ 
+          success: false, 
+          message: "Erro ao salvar sessão" 
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: "Conta criada com sucesso",
+        user: (req.session as any).user
+      });
     });
   } catch (error: any) {
     console.error("Error during registration:", error);
