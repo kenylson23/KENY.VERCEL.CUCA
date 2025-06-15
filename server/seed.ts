@@ -53,50 +53,26 @@ export async function seedDatabase() {
       {
         name: "João Silva",
         email: "joao@example.com",
-        subject: "Pergunta sobre distribuidores",
+        phone: "+244 912 345 678",
         message: "Gostaria de saber mais sobre como me tornar um distribuidor da CUCA na minha região.",
         status: "unread",
       },
       {
         name: "Maria Santos",
         email: "maria@example.com",
-        subject: "Produto defeituoso",
+        phone: "+244 923 456 789",
         message: "Comprei um pack de CUCA e uma das garrafas veio com defeito. Como posso resolver?",
         status: "read",
-        adminResponse: "Obrigado pelo contato. Entraremos em contato para resolver a situação.",
       },
       {
         name: "Pedro Costa",
         email: "pedro@example.com",
-        subject: "Sugestão de novo sabor",
         message: "Que tal criar uma versão da CUCA com sabor tropical? Seria um sucesso!",
         status: "unread",
       }
     ]).onConflictDoNothing();
 
-    // Seed test users with hashed passwords
-    const hashedPassword = await bcrypt.hash("123456", 10);
-    
-    await db.insert(users).values([
-      {
-        username: "usuario",
-        email: "usuario@cuca.ao",
-        password: hashedPassword,
-        firstName: "Usuário",
-        lastName: "Teste",
-        role: "user",
-        isActive: true,
-      },
-      {
-        username: "admin",
-        email: "admin@cuca.ao", 
-        password: hashedPassword,
-        firstName: "Admin",
-        lastName: "CUCA",
-        role: "admin",
-        isActive: true,
-      }
-    ]).onConflictDoNothing();
+    // Users are managed by Supabase Auth - no manual seeding needed
 
     console.log("Database seeded successfully!");
   } catch (error) {

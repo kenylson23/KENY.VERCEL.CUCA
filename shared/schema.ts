@@ -96,12 +96,11 @@ export const contactMessages = pgTable("contact_messages", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull(),
-  subject: text("subject").notNull(),
+  phone: text("phone"),
   message: text("message").notNull(),
-  status: varchar("status", { length: 50 }).notNull().default("unread"),
-  adminResponse: text("admin_response"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  status: text("status"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Analytics events table

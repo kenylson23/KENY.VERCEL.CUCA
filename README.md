@@ -17,9 +17,9 @@ A professional landing page for CUCA beer showcasing the brand's rich heritage t
 
 - **Frontend**: React with Framer Motion, Tailwind CSS
 - **Backend**: Express.js with TypeScript
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL (Supabase)
 - **ORM**: Drizzle ORM
-- **Authentication**: JWT & Supabase
+- **Authentication**: Supabase Auth
 - **Deployment**: Vercel
 
 ## Development
