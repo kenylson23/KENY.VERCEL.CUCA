@@ -1,3 +1,10 @@
+import { config } from 'dotenv';
+config(); // Load environment variables
+
+// Set Supabase environment variables
+process.env.VITE_SUPABASE_URL = 'https://qaskgmrxnxykmougppzk.supabase.co';
+process.env.VITE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc2tnbXJ4bnh5a21vdWdwcHprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1NTE0NjYsImV4cCI6MjA2NTEyNzQ2Nn0.JwCuZvDs93V413oj4DvMq2OTqicyxLzHmX3ZfgjsKlI';
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
