@@ -5,8 +5,14 @@ import { storage } from './storage.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
+// Admin credentials (hardcoded for simplicity)
+const ADMIN_CREDENTIALS = {
+  username: "admin",
+  password: "cuca2024"
+};
+
 export interface JWTPayload {
-  id: number;
+  id: number | string;
   username: string;
   email: string;
   role: string;
@@ -17,6 +23,7 @@ export interface JWTPayload {
 export const jwtLoginHandler: RequestHandler = async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log('JWT Login attempt for user:', username);
 
     if (!username || !password) {
       return res.status(400).json({
@@ -25,10 +32,40 @@ export const jwtLoginHandler: RequestHandler = async (req, res) => {
       });
     }
 
+    // Check for admin login first
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+      console.log('Admin login detected');
+      
+      // Generate JWT token for admin
+      const payload: JWTPayload = {
+        id: "admin-1",
+        username: "admin",
+        email: "admin@cuca.ao",
+        role: "admin"
+      };
+
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+
+      return res.json({
+        success: true,
+        message: 'Login de administrador realizado com sucesso',
+        user: {
+          id: "admin-1",
+          email: "admin@cuca.ao",
+          username: "admin",
+          firstName: "Admin",
+          lastName: "CUCA",
+          role: "admin"
+        },
+        token
+      });
+    }
+
     // Get user from database
     const user = await storage.getCustomerByUsername(username);
 
     if (!user) {
+      console.log('User not found:', username);
       return res.status(401).json({
         success: false,
         message: 'Usuário não encontrado'
@@ -36,6 +73,7 @@ export const jwtLoginHandler: RequestHandler = async (req, res) => {
     }
 
     if (!user.isActive) {
+      console.log('User account is inactive:', username);
       return res.status(401).json({
         success: false,
         message: 'Conta desativada'
@@ -44,6 +82,7 @@ export const jwtLoginHandler: RequestHandler = async (req, res) => {
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Password validation result for user:', username, isPasswordValid);
 
     if (!isPasswordValid) {
       return res.status(401).json({
