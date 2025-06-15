@@ -17,30 +17,10 @@ A professional landing page for CUCA beer showcasing the brand's rich heritage t
 
 - **Frontend**: React with Framer Motion, Tailwind CSS
 - **Backend**: Express.js with TypeScript
-- **Database**: PostgreSQL (Neon)
+- **Database**: PostgreSQL
 - **ORM**: Drizzle ORM
-- **Authentication**: Passport.js
+- **Authentication**: JWT & Supabase
 - **Deployment**: Vercel
-
-## Database Setup
-
-This project uses Neon PostgreSQL as the database. The schema includes:
-
-- Users and admin users
-- Product catalog
-- Order management
-- Contact messages
-- Analytics events
-- Fan photo gallery
-- Session storage
-
-## Environment Variables
-
-Create a `.env` file with:
-
-```env
-DATABASE_URL="postgresql://username:password@host:port/database?sslmode=require"
-```
 
 ## Development
 
@@ -49,14 +29,7 @@ DATABASE_URL="postgresql://username:password@host:port/database?sslmode=require"
 npm install
 ```
 
-2. Set up your database URL in `.env`
-
-3. Run database migrations:
-```bash
-npm run db:push
-```
-
-4. Start the development server:
+2. Start the development server:
 ```bash
 npm run dev
 ```
@@ -64,11 +37,7 @@ npm run dev
 ## Deployment to Vercel
 
 1. Connect your repository to Vercel
-2. Add the `DATABASE_URL` environment variable in Vercel dashboard:
-   ```
-   postgresql://neondb_owner:npg_kUOnioGj1RP5@ep-lucky-cherry-a402q9v4-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
-   ```
-3. Deploy
+2. Deploy
 
 The project includes a `vercel.json` configuration file for proper deployment.
 
