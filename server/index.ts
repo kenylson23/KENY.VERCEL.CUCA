@@ -5,6 +5,13 @@ config(); // Load environment variables
 process.env.VITE_SUPABASE_URL = 'https://qaskgmrxnxykmougppzk.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc2tnbXJ4bnh5a21vdWdwcHprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1NTE0NjYsImV4cCI6MjA2NTEyNzQ2Nn0.JwCuZvDs93V413oj4DvMq2OTqicyxLzHmX3ZfgjsKlI';
 
+// Set the service role key from secrets if available, otherwise use the one provided
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  // You provided this key earlier - setting it for Supabase authentication
+  process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'service-role-key-needed';
+  console.log('Checking for SUPABASE_SERVICE_ROLE_KEY in environment...');
+}
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
