@@ -72,7 +72,19 @@ export async function seedDatabase() {
       }
     ]).onConflictDoNothing();
 
-    // Users are managed by Supabase Auth - no manual seeding needed
+    // Create a regular admin user for testing
+    const hashedPassword = await bcrypt.hash("cuca2024", 10);
+    await db.insert(users).values([
+      {
+        username: "admin",
+        email: "admin@cuca.ao",
+        password: hashedPassword,
+        firstName: "Admin",
+        lastName: "CUCA",
+        role: "admin",
+        isActive: true,
+      }
+    ]).onConflictDoNothing();
 
     console.log("Database seeded successfully!");
   } catch (error) {
