@@ -33,7 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await seedDatabase();
 
   // Detect which authentication system to use
-  const useSupabase = !!(process.env.VITE_SUPABASE_URL && process.env.VITE_SUPABASE_ANON_KEY);
+  const useSupabase = !!(process.env.VITE_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
   
   if (useSupabase) {
     console.log('Authentication mode: Supabase');
