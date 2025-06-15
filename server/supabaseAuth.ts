@@ -168,7 +168,7 @@ export const supabaseLoginHandler: RequestHandler = async (req, res) => {
     }
 
     // Create a session using signInWithPassword
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: authError } = await supabase!.auth.signInWithPassword({
       email: user.email,
       password: password
     });
@@ -260,7 +260,7 @@ export const supabaseRegisterHandler: RequestHandler = async (req, res) => {
     });
 
     // Create user in Supabase
-    const { data, error } = await supabase.auth.admin.createUser({
+    const { data, error } = await supabase!.auth.admin.createUser({
       email,
       password,
       user_metadata: {
@@ -338,7 +338,7 @@ export const updateUserMetadataHandler: RequestHandler = async (req, res) => {
       });
     }
 
-    const { data, error } = await supabase.auth.admin.updateUserById(userId, {
+    const { data, error } = await supabase!.auth.admin.updateUserById(userId, {
       user_metadata: metadata
     });
 
@@ -366,7 +366,7 @@ export const updateUserMetadataHandler: RequestHandler = async (req, res) => {
 // List all users (admin only)
 export const listUsersHandler: RequestHandler = async (req, res) => {
   try {
-    const { data, error } = await supabase.auth.admin.listUsers();
+    const { data, error } = await supabase!.auth.admin.listUsers();
 
     if (error) {
       console.error('Error listing users:', error);
