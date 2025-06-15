@@ -9,6 +9,7 @@ import { Link, useLocation } from 'wouter';
 import { UserPlus } from 'lucide-react';
 
 export default function RegisterPage() {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,6 +31,16 @@ export default function RegisterPage() {
     setError('');
     setSuccess('');
 
+    if (!username.trim()) {
+      setError('Nome de usuário é obrigatório');
+      return;
+    }
+
+    if (username.length < 3) {
+      setError('Nome de usuário deve ter pelo menos 3 caracteres');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('As senhas não coincidem');
       return;
@@ -42,15 +53,17 @@ export default function RegisterPage() {
 
     try {
       await register.mutateAsync({ 
+        username,
         email, 
         password, 
         firstName, 
         lastName 
       });
       
-      setSuccess('Conta criada com sucesso! Verifique seu email para confirmar a conta.');
+      setSuccess('Conta criada com sucesso! Você já pode fazer login.');
       
       // Clear form
+      setUsername('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
@@ -87,6 +100,18 @@ export default function RegisterPage() {
                 <AlertDescription>{success}</AlertDescription>
               </Alert>
             )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="username">Nome de Usuário</Label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Escolha um nome de usuário"
+                required
+                minLength={3}
+              />
+            </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">

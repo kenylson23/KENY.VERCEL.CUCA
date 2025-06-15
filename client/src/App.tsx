@@ -12,6 +12,7 @@ const Home = lazy(() => import("@/pages/home"));
 const PontosVenda = lazy(() => import("@/pages/pontos-venda"));
 const GaleriaFas = lazy(() => import("@/pages/galeria-fas"));
 const Login = lazy(() => import("@/pages/Login"));
+const Register = lazy(() => import("@/pages/register"));
 const AdminPanel = lazy(() => import("@/pages/admin"));
 const AdminGaleria = lazy(() => import("@/pages/admin-galeria"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
