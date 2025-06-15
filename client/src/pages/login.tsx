@@ -12,12 +12,16 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const [, setLocation] = useLocation();
 
   // Redirect if already authenticated
   if (isAuthenticated) {
-    setLocation('/admin');
+    if (user?.role === 'admin') {
+      setLocation('/admin');
+    } else {
+      setLocation('/dashboard');
+    }
     return null;
   }
 
@@ -26,8 +30,13 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await login.mutateAsync({ username, password });
-      setLocation('/admin');
+      const result = await login.mutateAsync({ username, password });
+      // Redirect based on user role
+      if (result.user?.role === 'admin') {
+        setLocation('/admin');
+      } else {
+        setLocation('/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login');
     }
@@ -42,7 +51,7 @@ export default function LoginPage() {
             Entrar
           </CardTitle>
           <CardDescription className="text-center">
-            Entre com sua conta para acessar o painel administrativo
+            Entre com sua conta CUCA
           </CardDescription>
         </CardHeader>
         <CardContent>
