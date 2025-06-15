@@ -5,6 +5,12 @@ import type { RequestHandler } from 'express';
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Admin credentials (hardcoded for simplicity)
+const ADMIN_CREDENTIALS = {
+  username: "admin",
+  password: "cuca2024"
+};
+
 if (!supabaseUrl || !supabaseKey) {
   console.warn('Supabase variables not configured. Using fallback authentication.');
 }
@@ -16,7 +22,7 @@ export const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, s
   }
 }) : null;
 
-// Middleware to verify Supabase JWT token
+// Middleware to verify Supabase JWT token or custom admin JWT
 export const requireSupabaseAuth: RequestHandler = async (req, res, next) => {
   try {
     if (!supabase) {
@@ -36,6 +42,25 @@ export const requireSupabaseAuth: RequestHandler = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
+    
+    // First try to verify as custom JWT (for admin)
+    try {
+      const jwt = await import('jsonwebtoken');
+      const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      
+      // If this is a custom admin JWT, use it
+      if (decoded.id === 'admin-supabase' && decoded.role === 'admin') {
+        req.supabaseUser = {
+          id: decoded.id,
+          email: decoded.email,
+          role: decoded.role
+        };
+        return next();
+      }
+    } catch (jwtError) {
+      // Not a custom JWT, continue to Supabase verification
+    }
     
     // Verify the JWT token with Supabase
     const { data: { user }, error } = await supabase.auth.getUser(token);
@@ -94,6 +119,7 @@ export const getSupabaseUserHandler: RequestHandler = (req, res) => {
 export const supabaseLoginHandler: RequestHandler = async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log('Supabase Login attempt for user:', username);
 
     if (!username || !password) {
       return res.status(400).json({
@@ -102,8 +128,62 @@ export const supabaseLoginHandler: RequestHandler = async (req, res) => {
       });
     }
 
+    // Check for admin login first
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+      console.log('Admin login detected via Supabase');
+      
+      if (!supabase) {
+        return res.status(500).json({
+          success: false,
+          message: 'Supabase não configurado'
+        });
+      }
+
+      // For admin, we'll create a custom JWT token instead of using Supabase auth
+      // since email logins might be disabled
+      try {
+        const jwt = await import('jsonwebtoken');
+        const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+        
+        const adminPayload = {
+          id: 'admin-supabase',
+          email: 'admin@cuca.ao',
+          role: 'admin',
+          username: 'admin',
+          firstName: 'Admin',
+          lastName: 'CUCA'
+        };
+
+        const token = jwt.sign(adminPayload, JWT_SECRET, { expiresIn: '24h' });
+
+        return res.json({
+          success: true,
+          message: 'Login de administrador realizado com sucesso',
+          user: {
+            id: 'admin-supabase',
+            email: 'admin@cuca.ao',
+            username: 'admin',
+            firstName: 'Admin',
+            lastName: 'CUCA',
+            role: 'admin'
+          },
+          session: {
+            access_token: token,
+            token_type: 'bearer',
+            expires_in: 86400 // 24 hours
+          }
+        });
+      } catch (adminError) {
+        console.error('Error in admin authentication:', adminError);
+        return res.status(500).json({
+          success: false,
+          message: 'Erro na autenticação do administrador'
+        });
+      }
+    }
+
     // First, get user by username from our database
-    console.log('Supabase Login: Looking for user:', username);
+    console.log('Supabase Login: Looking for regular user:', username);
     const { storage } = await import('./storage.js');
     const user = await storage.getCustomerByUsername(username);
 
