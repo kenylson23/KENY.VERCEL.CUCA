@@ -9,7 +9,7 @@ const client = postgres({
   user: process.env.PGUSER || 'postgres',
   password: process.env.PGPASSWORD || '',
   database: process.env.PGDATABASE || 'postgres',
-  ssl: false,
+  ssl: process.env.PGHOST ? 'require' : false,
   prepare: false,
 });
 

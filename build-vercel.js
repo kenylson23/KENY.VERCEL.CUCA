@@ -35,7 +35,6 @@ async function buildForVercel() {
       'ws',
       'bufferutil', 
       'utf-8-validate',
-      '@neondatabase/serverless',
       'pg-native'
     ],
     banner: {

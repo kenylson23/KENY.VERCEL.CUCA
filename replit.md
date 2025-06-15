@@ -22,20 +22,19 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 - **Middleware**: Custom logging, CORS, and authentication middleware
 
 ### Database Architecture
-- **Database**: PostgreSQL (Supabase cloud hosting)
+- **Database**: PostgreSQL (Replit hosting)
 - **ORM**: Drizzle ORM with type-safe schema definitions
 - **Migrations**: Drizzle Kit for schema management
-- **Connection**: postgres-js driver with SSL for Supabase compatibility
-- **Authentication**: Supabase Auth with JWT tokens
+- **Connection**: postgres-js driver with SSL configuration
 
 ## Key Components
 
 ### Authentication System
-- **Primary**: Supabase Authentication with JWT tokens
-- **Admin Panel**: Role-based access control using Supabase user metadata
+- **Primary**: JWT tokens with fallback authentication
+- **Admin Panel**: Role-based access control
 - **Frontend**: React hooks with automatic token management
-- **Backend**: JWT verification middleware with Supabase service key
-- **Security**: Supabase handles password hashing, secure sessions, and token refresh
+- **Backend**: JWT verification middleware
+- **Security**: bcrypt password hashing and secure sessions
 
 ### Content Management
 - **Product Catalog**: Dynamic product showcase with image optimization
@@ -74,7 +73,7 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 - **esbuild**: Fast JavaScript bundler
 
 ### Cloud Services
-- **Supabase**: PostgreSQL database hosting with built-in auth and real-time features
+- **Replit**: PostgreSQL database hosting and development environment
 - **Vercel**: Serverless deployment platform
 
 ## Deployment Strategy
@@ -97,11 +96,10 @@ This is a professional sales landing page for CUCA beer, showcasing the brand's 
 
 ## Changelog
 
-- June 14, 2025: Initial setup with PostgreSQL/Neon database
-- June 14, 2025: Complete migration to Supabase database with postgres-js driver
-- June 14, 2025: Complete migration to Supabase authentication system replacing session-based auth
-- June 14, 2025: Migrated from Neon to Supabase database - removed all Neon dependencies and configured full Supabase integration
-- June 14, 2025: Implemented hybrid authentication system - automatically detects Supabase configuration and falls back to JWT when needed
+- June 15, 2025: Removed all Neon database dependencies and DATABASE_URL references
+- June 15, 2025: Configured application to use Replit PostgreSQL database with environment variables
+- June 15, 2025: Updated authentication system to use JWT tokens with fallback support
+- June 15, 2025: Cleaned up deployment files and removed external database configuration
 
 ## User Preferences
 
