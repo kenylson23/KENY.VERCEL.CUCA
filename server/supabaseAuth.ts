@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { RequestHandler } from 'express';
 
 // Initialize Supabase client with fallback check
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.warn('Supabase variables not configured. Using fallback authentication.');
@@ -19,6 +19,13 @@ export const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, s
 // Middleware to verify Supabase JWT token
 export const requireSupabaseAuth: RequestHandler = async (req, res, next) => {
   try {
+    if (!supabase) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Supabase não configurado' 
+      });
+    }
+
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -127,6 +134,10 @@ export const supabaseLoginHandler: RequestHandler = async (req, res) => {
     // Create or get Supabase user by email
     let supabaseUser;
     try {
+      if (!supabase) {
+        throw new Error('Supabase not configured');
+      }
+      
       // Try to get existing user
       const { data: existingUsers } = await supabase.auth.admin.listUsers();
       supabaseUser = existingUsers.users.find(u => u.email === user.email);
