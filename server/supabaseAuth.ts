@@ -103,10 +103,14 @@ export const supabaseLoginHandler: RequestHandler = async (req, res) => {
     }
 
     // First, get user by username from our database
+    console.log('Supabase Login: Looking for user:', username);
     const { storage } = await import('./storage.js');
     const user = await storage.getCustomerByUsername(username);
 
+    console.log('Supabase Login: User found:', user ? { id: user.id, username: user.username, email: user.email, role: user.role } : 'null');
+
     if (!user) {
+      console.log('Supabase Login: User not found in database');
       return res.status(401).json({
         success: false,
         message: 'Usuário não encontrado'
@@ -121,10 +125,14 @@ export const supabaseLoginHandler: RequestHandler = async (req, res) => {
     }
 
     // Verify password using bcrypt
+    console.log('Supabase Login: Verifying password for user:', username);
     const bcrypt = await import('bcrypt');
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    console.log('Supabase Login: Password validation result:', isPasswordValid);
 
     if (!isPasswordValid) {
+      console.log('Supabase Login: Password validation failed');
       return res.status(401).json({
         success: false,
         message: 'Senha incorreta'
