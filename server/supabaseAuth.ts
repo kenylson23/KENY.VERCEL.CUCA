@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import * as jwt from 'jsonwebtoken';
 import type { RequestHandler } from 'express';
 
 // Initialize Supabase client with fallback check
@@ -45,7 +46,6 @@ export const requireSupabaseAuth: RequestHandler = async (req, res, next) => {
     
     // First try to verify as custom JWT (for admin)
     try {
-      const jwt = await import('jsonwebtoken');
       const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
       const decoded = jwt.verify(token, JWT_SECRET) as any;
       
@@ -142,7 +142,6 @@ export const supabaseLoginHandler: RequestHandler = async (req, res) => {
       // For admin, we'll create a custom JWT token instead of using Supabase auth
       // since email logins might be disabled
       try {
-        const jwt = await import('jsonwebtoken');
         const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
         
         const adminPayload = {
