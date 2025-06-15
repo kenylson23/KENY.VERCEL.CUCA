@@ -8,6 +8,7 @@ export async function seedDatabase() {
     await db.insert(adminUsers).values([
       {
         id: "admin-1",
+        username: "admin",
         email: "admin@cuca.ao",
         firstName: "Admin",
         lastName: "CUCA",
@@ -23,10 +24,8 @@ export async function seedDatabase() {
         description: "A cerveja original que conquistou Angola com seu sabor único e refrescante.",
         price: "1500.00",
         category: "Cerveja",
-        alcoholContent: "5.0",
-        volume: 350,
         imageUrl: "/images/cuca-original.jpg",
-        stock: 100,
+        stockQuantity: 100,
         isActive: true,
       },
       {
@@ -34,10 +33,8 @@ export async function seedDatabase() {
         description: "Versão mais leve da CUCA, mantendo todo o sabor com menos calorias.",
         price: "1600.00",
         category: "Cerveja",
-        alcoholContent: "4.2",
-        volume: 350,
         imageUrl: "/images/cuca-light.jpg",
-        stock: 75,
+        stockQuantity: 75,
         isActive: true,
       },
       {
@@ -45,10 +42,8 @@ export async function seedDatabase() {
         description: "A versão premium da CUCA com ingredientes selecionados e sabor refinado.",
         price: "2000.00",
         category: "Cerveja Premium",
-        alcoholContent: "5.5",
-        volume: 500,
         imageUrl: "/images/cuca-premium.jpg",
-        stock: 50,
+        stockQuantity: 50,
         isActive: true,
       }
     ]).onConflictDoNothing();

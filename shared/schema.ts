@@ -28,14 +28,15 @@ export const sessions = pgTable(
 // Admin users table for Replit Auth
 export const adminUsers = pgTable("admin_users", {
   id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  username: varchar("username").notNull(),
+  email: varchar("email").notNull().unique(),
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
   role: varchar("role", { length: 50 }).notNull().default("admin"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  profileImageUrl: varchar("profile_image_url"),
   isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Customer users table
@@ -56,17 +57,15 @@ export const users = pgTable("users", {
 // Products table
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
+  name: text("name").notNull(),
   description: text("description"),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  category: varchar("category", { length: 100 }).notNull(),
-  alcoholContent: decimal("alcohol_content", { precision: 3, scale: 1 }),
-  volume: integer("volume"), // in ml
-  imageUrl: varchar("image_url", { length: 500 }),
-  isActive: boolean("is_active").notNull().default(true),
-  stock: integer("stock").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  price: decimal("price").notNull(),
+  category: text("category"),
+  imageUrl: text("image_url"),
+  stockQuantity: integer("stock_quantity"),
+  isActive: boolean("is_active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Orders table
