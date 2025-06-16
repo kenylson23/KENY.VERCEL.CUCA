@@ -52,7 +52,7 @@ export default function RegisterPage() {
     }
 
     try {
-      await register.mutateAsync({ 
+      const result = await register.mutateAsync({ 
         username,
         email, 
         password, 
@@ -60,7 +60,7 @@ export default function RegisterPage() {
         lastName 
       });
       
-      setSuccess('Conta criada com sucesso! Você já pode fazer login.');
+      setSuccess(result.message || 'Conta criada com sucesso! Verifique seu email para confirmar.');
       
       // Clear form
       setUsername('');

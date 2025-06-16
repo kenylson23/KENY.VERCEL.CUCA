@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import * as jwt from 'jsonwebtoken';
 import type { RequestHandler } from 'express';
 
 // Initialize Supabase client with fallback check
@@ -107,30 +106,23 @@ export const getSupabaseUserHandler: RequestHandler = (req, res) => {
   });
 };
 
-// Custom login handler that supports username
+// Login handler that supports both email and admin credentials
 export const supabaseLoginHandler: RequestHandler = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    console.log('Supabase Login attempt for user:', username);
+    const { email, password } = req.body;
+    console.log('Supabase Login attempt for user:', email);
 
-    if (!username || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Usuário e senha são obrigatórios'
+        message: 'Email e senha são obrigatórios'
       });
     }
 
     // Check for admin login first
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+    if (email === 'admin@cuca.ao' && password === ADMIN_CREDENTIALS.password) {
       console.log('Admin login detected via Supabase');
       
-      if (!supabase) {
-        return res.status(500).json({
-          success: false,
-          message: 'Supabase não configurado'
-        });
-      }
-
       // Generate a simple admin token
       const adminToken = `admin-token-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -154,308 +146,132 @@ export const supabaseLoginHandler: RequestHandler = async (req, res) => {
       });
     }
 
-    // First, get user by username from our database
-    console.log('Supabase Login: Looking for regular user:', username);
-    const { storage } = await import('./storage.js');
-    const user = await storage.getCustomerByUsername(username);
-
-    console.log('Supabase Login: User found:', user ? { id: user.id, username: user.username, email: user.email, role: user.role } : 'null');
-
-    if (!user) {
-      console.log('Supabase Login: User not found in database');
-      return res.status(401).json({
-        success: false,
-        message: 'Usuário não encontrado'
-      });
-    }
-
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Conta desativada'
-      });
-    }
-
-    // Verify password using bcrypt
-    console.log('Supabase Login: Verifying password for user:', username);
-    const bcrypt = await import('bcrypt');
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    
-    console.log('Supabase Login: Password validation result:', isPasswordValid);
-
-    if (!isPasswordValid) {
-      console.log('Supabase Login: Password validation failed');
-      return res.status(401).json({
-        success: false,
-        message: 'Senha incorreta'
-      });
-    }
-
-    // Create or get Supabase user by email
-    let supabaseUser;
-    try {
-      if (!supabase) {
-        throw new Error('Supabase not configured');
-      }
-      
-      // Try to get existing user
-      const { data: existingUsers } = await supabase.auth.admin.listUsers();
-      supabaseUser = existingUsers.users.find(u => u.email === user.email);
-
-      if (!supabaseUser) {
-        // Create new Supabase user
-        const { data, error } = await supabase.auth.admin.createUser({
-          email: user.email,
-          password: password,
-          user_metadata: {
-            username: user.username,
-            first_name: user.firstName,
-            last_name: user.lastName,
-            role: user.role || 'user'
-          },
-          email_confirm: true
-        });
-
-        if (error) throw error;
-        supabaseUser = data.user;
-      }
-    } catch (error) {
-      console.error('Error managing Supabase user:', error);
+    // Use Supabase authentication for regular users
+    if (!supabase) {
       return res.status(500).json({
         success: false,
-        message: 'Erro interno do servidor'
+        message: 'Supabase não configurado'
       });
     }
 
-    // Create a session using signInWithPassword
-    const { data: authData, error: authError } = await supabase!.auth.signInWithPassword({
-      email: user.email,
-      password: password
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    if (authError) {
-      console.error('Error creating Supabase session:', authError);
-      // Fallback: return user data without Supabase session
-      res.json({
+    if (error) {
+      console.log('Supabase Login error:', error.message);
+      return res.status(401).json({
+        success: false,
+        message: 'Credenciais inválidas'
+      });
+    }
+
+    if (data.user && data.session) {
+      const user = {
+        id: data.user.id,
+        email: data.user.email!,
+        username: data.user.user_metadata?.username || data.user.email!.split('@')[0],
+        firstName: data.user.user_metadata?.firstName || '',
+        lastName: data.user.user_metadata?.lastName || '',
+        role: data.user.user_metadata?.role || 'user'
+      };
+
+      return res.json({
         success: true,
         message: 'Login realizado com sucesso',
-        user: {
-          id: user.id.toString(),
-          email: user.email,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role || 'user'
-        },
-        session: null
+        user,
+        token: data.session.access_token,
+        session: data.session
       });
-      return;
     }
 
-    res.json({
-      success: true,
-      message: 'Login realizado com sucesso',
-      user: {
-        id: authData.user.id,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role || 'user'
-      },
-      session: {
-        access_token: authData.session?.access_token,
-        refresh_token: authData.session?.refresh_token,
-        expires_in: authData.session?.expires_in,
-        token_type: authData.session?.token_type,
-        user: authData.user
-      }
+    return res.status(401).json({
+      success: false,
+      message: 'Erro no login'
     });
-
   } catch (error) {
-    console.error('Error in supabaseLoginHandler:', error);
-    res.status(500).json({
+    console.error('Supabase login error:', error);
+    return res.status(500).json({
       success: false,
       message: 'Erro interno do servidor'
     });
   }
 };
 
-// Register handler that creates both database and Supabase users
+// Register handler
 export const supabaseRegisterHandler: RequestHandler = async (req, res) => {
   try {
     const { username, email, password, firstName, lastName } = req.body;
 
-    if (!username || !email || !password || !firstName || !lastName) {
+    if (!email || !password || !username) {
       return res.status(400).json({
         success: false,
-        message: 'Todos os campos são obrigatórios'
+        message: 'Email, senha e username são obrigatórios'
       });
     }
 
-    const { storage } = await import('./storage.js');
-    const bcrypt = await import('bcrypt');
-
-    // Check if username or email already exists
-    const existingUser = await storage.getCustomerByUsername(username);
-    if (existingUser) {
-      return res.status(400).json({
+    if (!supabase) {
+      return res.status(500).json({
         success: false,
-        message: 'Nome de usuário já está em uso'
+        message: 'Supabase não configurado'
       });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user in database
-    const newUser = await storage.createCustomer({
-      username,
-      email,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      role: 'user',
-      isActive: true
-    });
-
-    // Create user in Supabase
-    const { data, error } = await supabase!.auth.admin.createUser({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      user_metadata: {
-        username,
-        first_name: firstName,
-        last_name: lastName,
-        role: 'user'
-      },
-      email_confirm: true
+      options: {
+        data: {
+          username,
+          firstName,
+          lastName,
+          role: 'user'
+        }
+      }
     });
 
     if (error) {
-      console.error('Error creating Supabase user:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Erro ao criar usuário no sistema de autenticação'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Conta criada com sucesso! Você já pode fazer login.',
-      user: {
-        id: data.user.id,
-        email: newUser.email,
-        username: newUser.username,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role
-      }
-    });
-
-  } catch (error: any) {
-    console.error('Error in supabaseRegisterHandler:', error);
-    
-    if (error.code === '23505') {
-      if (error.constraint?.includes('email')) {
-        return res.status(400).json({
-          success: false,
-          message: 'Email já está em uso'
-        });
-      }
-      if (error.constraint?.includes('username')) {
-        return res.status(400).json({
-          success: false,
-          message: 'Nome de usuário já está em uso'
-        });
-      }
-    }
-
-    res.status(500).json({
-      success: false,
-      message: 'Erro interno do servidor'
-    });
-  }
-};
-
-// Logout handler (client-side only with Supabase)
-export const supabaseLogoutHandler: RequestHandler = (req, res) => {
-  res.json({
-    success: true,
-    message: 'Logout realizado com sucesso'
-  });
-};
-
-// Update user metadata (admin only)
-export const updateUserMetadataHandler: RequestHandler = async (req, res) => {
-  try {
-    const { userId, metadata } = req.body;
-    
-    if (!userId || !metadata) {
       return res.status(400).json({
         success: false,
-        message: 'ID do usuário e metadata são obrigatórios'
+        message: error.message
       });
     }
 
-    const { data, error } = await supabase!.auth.admin.updateUserById(userId, {
-      user_metadata: metadata
-    });
-
-    if (error) {
-      console.error('Error updating user metadata:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Erro ao atualizar dados do usuário'
-      });
-    }
-
-    res.json({
+    return res.json({
       success: true,
-      user: data.user
+      message: 'Conta criada com sucesso! Verifique seu email para confirmar.'
     });
   } catch (error) {
-    console.error('Error in updateUserMetadataHandler:', error);
-    res.status(500).json({
+    console.error('Register error:', error);
+    return res.status(500).json({
       success: false,
       message: 'Erro interno do servidor'
     });
   }
 };
 
-// List all users (admin only)
-export const listUsersHandler: RequestHandler = async (req, res) => {
+// Logout handler
+export const supabaseLogoutHandler: RequestHandler = async (req, res) => {
   try {
-    const { data, error } = await supabase!.auth.admin.listUsers();
-
-    if (error) {
-      console.error('Error listing users:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Erro ao listar usuários'
-      });
+    if (supabase) {
+      await supabase.auth.signOut();
     }
-
+    
     res.json({
       success: true,
-      users: data.users.map(user => ({
-        id: user.id,
-        email: user.email,
-        role: user.user_metadata?.role || 'user',
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at
-      }))
+      message: 'Logout realizado com sucesso'
     });
   } catch (error) {
-    console.error('Error in listUsersHandler:', error);
+    console.error('Logout error:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro no logout'
     });
   }
 };
 
-// Type declaration for user in request
+// Type augmentation for Express Request
 declare global {
   namespace Express {
     interface Request {

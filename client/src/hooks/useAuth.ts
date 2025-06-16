@@ -24,8 +24,8 @@ export function useAuth() {
   }, []);
 
   const login = useMutation({
-    mutationFn: async ({ username, password }: { username: string; password: string }) => {
-      const result = await AuthService.login({ username, password });
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      const result = await AuthService.login({ email, password });
       
       if (!result.success) {
         throw new Error(result.message);
