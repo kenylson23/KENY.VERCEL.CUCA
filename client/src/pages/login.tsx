@@ -9,7 +9,7 @@ import { Link, useLocation } from 'wouter';
 import { LogIn, UserPlus } from 'lucide-react';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login, isAuthenticated, user } = useAuth();
@@ -30,7 +30,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const result = await login.mutateAsync({ username, password });
+      const result = await login.mutateAsync({ email, password });
       // Redirect based on user role
       if (result.user?.role === 'admin') {
         setLocation('/admin');
