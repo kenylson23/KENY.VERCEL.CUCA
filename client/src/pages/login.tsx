@@ -9,7 +9,7 @@ import { Link, useLocation } from 'wouter';
 import { LogIn, UserPlus } from 'lucide-react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login, isAuthenticated, user } = useAuth();
@@ -30,7 +30,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const result = await login.mutateAsync({ email, password });
+      const result = await login.mutateAsync({ username, password });
       // Redirect based on user role
       if (result.user?.role === 'admin') {
         setLocation('/admin');
@@ -63,13 +63,13 @@ export default function LoginPage() {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Usuário</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Seu email"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Seu nome de usuário"
                 required
               />
             </div>

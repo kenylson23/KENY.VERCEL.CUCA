@@ -8,14 +8,7 @@ import {
   insertAnalyticsEventSchema,
   insertFanPhotoSchema 
 } from "../shared/schema.js";
-import { 
-  supabaseLoginHandler,
-  supabaseRegisterHandler,
-  supabaseLogoutHandler,
-  getSupabaseUserHandler,
-  requireSupabaseAuth,
-  requireAdminRole
-} from "./supabaseAuth.js";
+
 import { 
   jwtLoginHandler,
   jwtRegisterHandler,
@@ -32,32 +25,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed database on startup
   await seedDatabase();
 
-  // Detect which authentication system to use
-  const useSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  // Use JWT authentication
+  console.log('Authentication mode: JWT');
   
-  if (useSupabase) {
-    console.log('Authentication mode: Supabase');
-    
-    // Supabase Auth routes
-    app.post('/api/auth/login', supabaseLoginHandler);
-    app.post('/api/auth/register', supabaseRegisterHandler);
-    app.post('/api/auth/logout', supabaseLogoutHandler);
-    app.get('/api/auth/user', requireSupabaseAuth, getSupabaseUserHandler);
-    
-    // Set Supabase auth middleware
-    var authMiddleware: RequestHandler = requireSupabaseAuth;
-  } else {
-    console.log('Authentication mode: JWT (Fallback)');
-    
-    // JWT Auth routes (fallback)
-    app.post('/api/auth/login', jwtLoginHandler);
-    app.post('/api/auth/register', jwtRegisterHandler);
-    app.post('/api/auth/logout', jwtLogoutHandler);
-    app.get('/api/auth/user', requireJWTAuth, jwtGetUserHandler);
-    
-    // Set JWT auth middleware
-    var authMiddleware: RequestHandler = requireJWTAuth;
-  }
+  // JWT Auth routes
+  app.post('/api/auth/login', jwtLoginHandler);
+  app.post('/api/auth/register', jwtRegisterHandler);
+  app.post('/api/auth/logout', jwtLogoutHandler);
+  app.get('/api/auth/user', requireJWTAuth, jwtGetUserHandler);
+  
+  // Set JWT auth middleware
+  var authMiddleware: RequestHandler = requireJWTAuth;
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {

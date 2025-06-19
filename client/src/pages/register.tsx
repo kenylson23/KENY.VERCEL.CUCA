@@ -60,7 +60,7 @@ export default function RegisterPage() {
         lastName 
       });
       
-      setSuccess(result.message || 'Conta criada com sucesso! Verifique seu email para confirmar.');
+      setSuccess(result.message || 'Conta criada com sucesso! Você já pode fazer login.');
       
       // Clear form
       setUsername('');

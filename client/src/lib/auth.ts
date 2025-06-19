@@ -1,7 +1,5 @@
-import { supabase } from './supabase';
-
 export interface User {
-  id: string;
+  id: number;
   username: string;
   email: string;
   firstName: string;
@@ -17,7 +15,7 @@ export interface AuthResponse {
 }
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -30,175 +28,116 @@ export interface RegisterRequest {
 }
 
 export class AuthService {
-  static async login(credentials: LoginRequest): Promise<AuthResponse> {
-    try {
-      // Admin login check
-      if (credentials.email === 'admin@cuca.ao' && credentials.password === 'cuca2024') {
-        const adminToken = 'admin-token-' + Date.now();
-        localStorage.setItem('supabase.auth.token', adminToken);
-        
-        const adminUser: User = {
-          id: 'admin-supabase',
-          email: 'admin@cuca.ao',
-          username: 'admin',
-          firstName: 'Admin',
-          lastName: 'CUCA',
-          role: 'admin'
-        };
-        
-        localStorage.setItem('auth_user', JSON.stringify(adminUser));
-        
-        return {
-          success: true,
-          message: 'Login de administrador realizado com sucesso',
-          user: adminUser,
-          token: adminToken
-        };
-      }
+  private static TOKEN_KEY = 'auth_token';
+  private static USER_KEY = 'auth_user';
 
-      // Regular user login with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password,
-      });
-
-      if (error) {
-        return {
-          success: false,
-          message: 'Credenciais inválidas'
-        };
-      }
-
-      if (data.user && data.session) {
-        const user: User = {
-          id: data.user.id,
-          email: data.user.email!,
-          username: data.user.user_metadata?.username || data.user.email!.split('@')[0],
-          firstName: data.user.user_metadata?.firstName || '',
-          lastName: data.user.user_metadata?.lastName || '',
-          role: data.user.user_metadata?.role || 'user'
-        };
-
-        localStorage.setItem('auth_user', JSON.stringify(user));
-        
-        return {
-          success: true,
-          message: 'Login realizado com sucesso',
-          user,
-          token: data.session.access_token
-        };
-      }
-
-      return {
-        success: false,
-        message: 'Erro no login'
-      };
-    } catch (error) {
-      console.error('Login error:', error);
-      return {
-        success: false,
-        message: 'Erro interno do servidor'
-      };
-    }
+  static getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  static async register(userData: RegisterRequest): Promise<AuthResponse> {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: {
-          data: {
-            username: userData.username,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            role: 'user'
-          }
-        }
-      });
-
-      if (error) {
-        return {
-          success: false,
-          message: error.message
-        };
-      }
-
-      return {
-        success: true,
-        message: 'Conta criada com sucesso! Verifique seu email para confirmar.'
-      };
-    } catch (error) {
-      console.error('Register error:', error);
-      return {
-        success: false,
-        message: 'Erro interno do servidor'
-      };
-    }
+  static setToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
   }
 
-  static async logout(): Promise<void> {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      localStorage.removeItem('auth_user');
-      localStorage.removeItem('supabase.auth.token');
-    }
-  }
-
-  static async getCurrentUser(): Promise<User | null> {
-    try {
-      // Check for admin token
-      const adminToken = localStorage.getItem('supabase.auth.token');
-      if (adminToken && adminToken.startsWith('admin-token-')) {
-        const adminUser = localStorage.getItem('auth_user');
-        if (adminUser) {
-          return JSON.parse(adminUser);
-        }
-      }
-
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error || !user) {
-        localStorage.removeItem('auth_user');
-        return null;
-      }
-
-      const userData: User = {
-        id: user.id,
-        email: user.email!,
-        username: user.user_metadata?.username || user.email!.split('@')[0],
-        firstName: user.user_metadata?.firstName || '',
-        lastName: user.user_metadata?.lastName || '',
-        role: user.user_metadata?.role || 'user'
-      };
-
-      localStorage.setItem('auth_user', JSON.stringify(userData));
-      return userData;
-    } catch (error) {
-      console.error('Get current user error:', error);
-      localStorage.removeItem('auth_user');
-      return null;
-    }
+  static removeToken(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
   }
 
   static getUser(): User | null {
-    const userData = localStorage.getItem('auth_user');
+    const userData = localStorage.getItem(this.USER_KEY);
     return userData ? JSON.parse(userData) : null;
   }
 
+  static setUser(user: User): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+  }
+
+  static async login(credentials: LoginRequest): Promise<AuthResponse> {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+
+    const data = await response.json();
+
+    if (data.success && data.token) {
+      this.setToken(data.token);
+      this.setUser(data.user);
+    }
+
+    return data;
+  }
+
+  static async register(userData: RegisterRequest): Promise<AuthResponse> {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    return response.json();
+  }
+
+  static async logout(): Promise<void> {
+    const token = this.getToken();
+    
+    if (token) {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+      } catch (error) {
+        console.error('Error during logout:', error);
+      }
+    }
+
+    this.removeToken();
+  }
+
+  static async getCurrentUser(): Promise<User | null> {
+    const token = this.getToken();
+    
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const response = await fetch('/api/auth/user', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          this.setUser(data.user);
+          return data.user;
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+    }
+
+    this.removeToken();
+    return null;
+  }
+
   static isAuthenticated(): boolean {
-    return !!this.getUser();
+    return !!this.getToken();
   }
 
   static isAdmin(): boolean {
     const user = this.getUser();
     return user?.role === 'admin';
-  }
-
-  static getToken(): string | null {
-    return localStorage.getItem('supabase.auth.token');
   }
 }
