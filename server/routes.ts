@@ -281,11 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user ID based on authentication system
       let dbUserId: number | null = null;
       
-      if (useSupabase && req.supabaseUser) {
-        // For Supabase, map the Supabase user ID to our database user ID
-        const dbUser = await storage.getCustomerByUsername(req.supabaseUser.email || '');
-        dbUserId = dbUser ? dbUser.id : null;
-      } else if (req.user) {
+      if (req.user) {
         // For JWT authentication
         dbUserId = typeof req.user.id === 'string' ? parseInt(req.user.id) : req.user.id;
       }
@@ -337,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/fan-gallery/:id/approve", authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const adminUser = useSupabase ? (req.supabaseUser?.email || "admin") : (req.user?.email || "admin");
+      const adminUser = req.user?.email || "admin";
       
       const photo = await storage.updateFanPhotoStatus(id, "approved", adminUser);
       res.json({ success: true, message: "Foto aprovada com sucesso!", photo });
@@ -350,7 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/fan-gallery/:id/reject", authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const adminUser = useSupabase ? (req.supabaseUser?.email || "admin") : (req.user?.email || "admin");
+      const adminUser = req.user?.email || "admin";
       
       const photo = await storage.updateFanPhotoStatus(id, "rejected", adminUser);
       res.json({ success: true, message: "Foto rejeitada com sucesso!", photo });
