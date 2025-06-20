@@ -1,8 +1,34 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useRef } from "react";
 
 export default function HeroSection() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      const playVideo = () => {
+        video.currentTime = 0;
+        video.play().catch(console.error);
+      };
+
+      video.addEventListener('loadeddata', playVideo);
+      video.addEventListener('ended', playVideo);
+      
+      // Force initial play
+      if (video.readyState >= 3) {
+        playVideo();
+      }
+
+      return () => {
+        video.removeEventListener('loadeddata', playVideo);
+        video.removeEventListener('ended', playVideo);
+      };
+    }
+  }, []);
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -22,17 +48,20 @@ export default function HeroSection() {
       {/* Hero Video Background */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.video
+          ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
+          preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1.5 }}
         >
-          <source src="/videos/hero-video.mov" type="video/quicktime" />
+          <source src="/videos/hero-video-optimized.mp4" type="video/mp4" />
           <source src="/videos/hero-video.mp4" type="video/mp4" />
+          <source src="/videos/hero-video.mov" type="video/quicktime" />
         </motion.video>
         {/* Video overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-40" />
