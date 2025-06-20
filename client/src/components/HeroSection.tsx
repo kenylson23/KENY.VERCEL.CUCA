@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CucaBottle3D from "./CucaBottle3D";
 
 export default function HeroSection() {
   const scrollToSection = (sectionId: string) => {
@@ -20,20 +19,28 @@ export default function HeroSection() {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Hero Background */}
-      <motion.div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), url('/images/cuca-hero.jpg')`,
-        }}
-        initial={{ scale: 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 1.5 }}
-      />
+      {/* Hero Video Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1.5 }}
+        >
+          <source src="/videos/hero-video.mov" type="video/quicktime" />
+          <source src="/videos/hero-video.mp4" type="video/mp4" />
+        </motion.video>
+        {/* Video overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-40" />
+      </div>
       
-      <div className="relative z-10 grid lg:grid-cols-2 gap-8 items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Left side - Text content */}
-        <div className="text-center lg:text-left">
+      <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Text content */}
+        <div>
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -53,7 +60,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-montserrat font-semibold text-xl sm:text-2xl md:text-3xl lg:text-4xl text-cuca-white mb-6 sm:mb-8"
+            className="font-montserrat font-semibold text-xl sm:text-2xl md:text-3xl lg:text-4xl text-cuca-white mb-6 sm:mb-8 max-w-4xl mx-auto"
           >
             Em Angola, cerveja é CUCA
           </motion.p>
@@ -62,7 +69,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-base sm:text-lg lg:text-xl mb-8 sm:mb-12 max-w-2xl lg:max-w-none mx-auto lg:mx-0 leading-relaxed text-[#ffd900] px-4 lg:px-0"
+            className="text-base sm:text-lg lg:text-xl mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed text-[#ffd900] px-4 lg:px-0"
           >
             A cerveja que une Angola há gerações. Sabor autêntico, tradição
             genuína, orgulho nacional.
@@ -72,7 +79,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center px-4 lg:px-0"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4 lg:px-0"
           >
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -99,16 +106,6 @@ export default function HeroSection() {
             </motion.div>
           </motion.div>
         </div>
-
-        {/* Right side - 3D Bottle Animation */}
-        <motion.div
-          initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, delay: 0.8 }}
-          className="flex justify-center lg:justify-end"
-        >
-          <CucaBottle3D />
-        </motion.div>
       </div>
 
       {/* Scroll Indicator */}
