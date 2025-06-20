@@ -22,7 +22,7 @@ export default function RegisterPage() {
 
   // Redirect if already authenticated
   if (isAuthenticated) {
-    setLocation('/admin');
+    setLocation('/dashboard');
     return null;
   }
 

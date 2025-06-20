@@ -191,6 +191,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User-specific routes
+  app.get("/api/user/orders", requireJWTAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const orders = await storage.getOrdersByUser(parseInt(userId.toString()));
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching user orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
   // Analytics routes
   app.post("/api/analytics", async (req, res) => {
     try {
