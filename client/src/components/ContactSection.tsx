@@ -65,12 +65,24 @@ export default function ContactSection() {
         description: "Obrigado pela sua mensagem! Entraremos em contato em breve.",
       });
       setFormData({ name: "", email: "", phone: "", message: "" });
-    } catch (error) {
-      toast({
-        title: "Erro ao enviar mensagem",
-        description: "Ocorreu um erro ao enviar sua mensagem. Tente novamente.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      console.error("Contact form error:", error);
+      
+      // Check if it's a validation error
+      if (error?.errors && Array.isArray(error.errors)) {
+        const validationMessages = error.errors.map((err: any) => err.message).join(", ");
+        toast({
+          title: "Dados inválidos",
+          description: validationMessages,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro ao enviar mensagem",
+          description: "Ocorreu um erro ao enviar sua mensagem. Tente novamente.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -195,8 +207,9 @@ export default function ContactSection() {
                     type="text"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Seu nome"
+                    placeholder="Seu nome (mínimo 2 caracteres)"
                     required
+                    minLength={2}
                     className="focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300"
                   />
                 </motion.div>
@@ -257,8 +270,9 @@ export default function ContactSection() {
                   rows={5}
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="Sua mensagem..."
+                  placeholder="Sua mensagem (mínimo 10 caracteres)..."
                   required
+                  minLength={10}
                   className="focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300 resize-none"
                 />
               </motion.div>
