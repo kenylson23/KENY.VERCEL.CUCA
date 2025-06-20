@@ -48,11 +48,29 @@ export default function ContactSection() {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate before submitting
+    const hasErrors = Object.values(errors).some(error => error !== "");
+    const hasEmptyRequiredFields = !formData.name || !formData.email || !formData.message;
+    
+    if (hasErrors || hasEmptyRequiredFields) {
+      toast({
+        title: "Dados inválidos",
+        description: "Por favor, corrija os erros antes de enviar.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsSubmitting(true);
 
@@ -89,7 +107,38 @@ export default function ContactSection() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Real-time validation
+    const newErrors = { ...errors };
+    
+    if (name === "name") {
+      if (value.length > 0 && value.length < 2) {
+        newErrors.name = "Nome deve ter pelo menos 2 caracteres";
+      } else {
+        newErrors.name = "";
+      }
+    }
+    
+    if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (value.length > 0 && !emailRegex.test(value)) {
+        newErrors.email = "Email inválido";
+      } else {
+        newErrors.email = "";
+      }
+    }
+    
+    if (name === "message") {
+      if (value.length > 0 && value.length < 10) {
+        newErrors.message = "Mensagem deve ter pelo menos 10 caracteres";
+      } else {
+        newErrors.message = "";
+      }
+    }
+    
+    setErrors(newErrors);
   };
 
   return (
@@ -210,8 +259,11 @@ export default function ContactSection() {
                     placeholder="Seu nome (mínimo 2 caracteres)"
                     required
                     minLength={2}
-                    className="focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300"
+                    className={`focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300 ${errors.name ? 'border-red-500' : ''}`}
                   />
+                  {errors.name && (
+                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                  )}
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -230,8 +282,11 @@ export default function ContactSection() {
                     onChange={handleChange}
                     placeholder="seu@email.com"
                     required
-                    className="focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300"
+                    className={`focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300 ${errors.email ? 'border-red-500' : ''}`}
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
                 </motion.div>
               </div>
 
@@ -273,8 +328,11 @@ export default function ContactSection() {
                   placeholder="Sua mensagem (mínimo 10 caracteres)..."
                   required
                   minLength={10}
-                  className="focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300 resize-none"
+                  className={`focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300 resize-none ${errors.message ? 'border-red-500' : ''}`}
                 />
+                {errors.message && (
+                  <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+                )}
               </motion.div>
 
               <motion.div
