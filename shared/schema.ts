@@ -193,10 +193,9 @@ export const insertProductSchema = createInsertSchema(products).pick({
   description: true,
   price: true,
   category: true,
-  alcoholContent: true,
-  volume: true,
   imageUrl: true,
-  stock: true,
+  stockQuantity: true,
+  isActive: true,
 });
 
 export const insertOrderSchema = createInsertSchema(orders).pick({

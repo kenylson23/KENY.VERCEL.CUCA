@@ -44,7 +44,7 @@ export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subject: "",
+    phone: "",
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,26 +54,17 @@ export default function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isAuthenticated) {
-      toast({
-        title: "Login necessário",
-        description: "Você precisa estar logado para enviar uma mensagem.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
       // Submit via API
-      await apiRequest("POST", "/api/contact", formData);
+      await apiRequest("/api/contact", "POST", formData);
       
       toast({
         title: "Mensagem enviada!",
         description: "Obrigado pela sua mensagem! Entraremos em contato em breve.",
       });
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
       toast({
         title: "Erro ao enviar mensagem",
@@ -237,17 +228,16 @@ export default function ContactSection() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
               >
-                <Label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
-                  Assunto
+                <Label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
+                  Telefone (opcional)
                 </Label>
                 <Input
-                  id="subject"
-                  name="subject"
-                  type="text"
-                  value={formData.subject}
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Assunto da mensagem"
-                  required
+                  placeholder="+244 xxx xxx xxx"
                   className="focus:ring-2 focus:ring-cuca-yellow focus:border-transparent transition-all duration-300"
                 />
               </motion.div>
@@ -281,31 +271,13 @@ export default function ContactSection() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {isAuthenticated ? (
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-cuca-red hover:bg-red-700 text-white font-montserrat font-semibold py-3 sm:py-4 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
-                  </Button>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="text-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="text-sm text-yellow-800 font-medium">
-                        Você precisa estar logado para enviar uma mensagem
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={() => window.location.href = "/login"}
-                      className="w-full bg-cuca-red hover:bg-red-700 text-white font-montserrat font-semibold py-3 sm:py-4 transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      <LogIn className="h-5 w-5" />
-                      Fazer Login para Enviar Mensagem
-                    </Button>
-                  </div>
-                )}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-cuca-red hover:bg-red-700 text-white font-montserrat font-semibold py-3 sm:py-4 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
+                </Button>
               </motion.div>
             </form>
           </motion.div>
