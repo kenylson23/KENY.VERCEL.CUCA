@@ -1,112 +1,135 @@
-# CUCA Beer - Professional Sales Landing Page
+# CUCA Cerveja - Site Profissional de Vendas
 
-## Overview
+## Visão Geral
 
-This is a professional sales landing page for CUCA beer, showcasing the brand's rich heritage through an interactive and dynamically animated React-based frontend. The application features a modern tech stack with React, Express.js, PostgreSQL, and is optimized for deployment on Vercel with serverless functions.
+Este é um site profissional de vendas para a cerveja CUCA, apresentando a rica herança da marca através de uma interface React interativa e dinamicamente animada. A aplicação possui uma stack tecnológica moderna com React, Express.js, PostgreSQL, e está otimizada para deployment no Vercel com funções serverless.
 
-## System Architecture
+## Arquitetura do Sistema
 
-### Frontend Architecture
-- **Framework**: React with TypeScript
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **Animations**: Framer Motion for smooth transitions and interactions
-- **Build Tool**: Vite for fast development and optimized builds
-- **State Management**: TanStack Query for server state management
-- **Routing**: Wouter for lightweight client-side routing
+### Arquitetura Frontend
+- **Framework**: React com TypeScript
+- **Estilização**: Tailwind CSS com componentes shadcn/ui
+- **Animações**: Framer Motion para transições e interações suaves
+- **Ferramenta de Build**: Vite para desenvolvimento rápido e builds otimizados
+- **Gerenciamento de Estado**: TanStack Query para gerenciamento de estado do servidor
+- **Roteamento**: Wouter para roteamento leve do lado do cliente
 
-### Backend Architecture
-- **Runtime**: Node.js with Express.js
-- **Language**: TypeScript with ES modules
-- **Session Management**: Dual authentication system (sessions for traditional deployment, JWT for Vercel)
-- **API Design**: RESTful endpoints with proper error handling
-- **Middleware**: Custom logging, CORS, and authentication middleware
+### Arquitetura Backend
+- **Runtime**: Node.js com Express.js
+- **Linguagem**: TypeScript com módulos ES
+- **Gerenciamento de Sessão**: Sistema de autenticação duplo (sessões para deployment tradicional, JWT para Vercel)
+- **Design de API**: Endpoints RESTful com tratamento adequado de erros
+- **Middleware**: Logging customizado, CORS e middleware de autenticação
 
-### Database Architecture
-- **Database**: PostgreSQL (Supabase hosting)
-- **ORM**: Drizzle ORM with type-safe schema definitions
-- **Migrations**: Drizzle Kit for schema management
-- **Connection**: postgres-js driver with SSL for Supabase
+### Arquitetura de Banco de Dados
+- **Banco de Dados**: PostgreSQL (hospedagem Supabase)
+- **ORM**: Drizzle ORM com definições de schema type-safe
+- **Migrações**: Drizzle Kit para gerenciamento de schema
+- **Conexão**: Driver postgres-js com SSL para Supabase
 
-## Key Components
+## Componentes Principais
 
-### Authentication System
-- **Primary**: Supabase Authentication with JWT tokens
-- **Admin Panel**: Role-based access control using Supabase user metadata
-- **Frontend**: React hooks with automatic token management
-- **Backend**: Supabase JWT verification middleware
-- **Security**: Supabase handles password hashing, secure sessions, and token refresh
+### Sistema de Autenticação
+- **Principal**: Autenticação Supabase com tokens JWT
+- **Painel Admin**: Controle de acesso baseado em roles usando metadados do usuário Supabase
+- **Frontend**: React hooks com gerenciamento automático de tokens
+- **Backend**: Middleware de verificação JWT Supabase
+- **Segurança**: Supabase gerencia hash de senhas, sessões seguras e renovação de tokens
 
-### Content Management
-- **Product Catalog**: Dynamic product showcase with image optimization
-- **Contact System**: Message handling with admin moderation
-- **Fan Gallery**: User-generated content with approval workflow
-- **Analytics**: Event tracking and usage statistics
+### Gerenciamento de Conteúdo
+- **Catálogo de Produtos**: Showcase dinâmico de produtos com otimização de imagens
+- **Sistema de Contato**: Tratamento de mensagens com moderação admin
+- **Galeria de Fãs**: Conteúdo gerado por usuários com fluxo de aprovação
+- **Analytics**: Rastreamento de eventos e estatísticas de uso
 
-### Performance Optimization
-- **Lazy Loading**: Component-level code splitting and lazy loading
-- **Image Optimization**: WebP format support with fallbacks
-- **Caching**: Query caching with TanStack Query
-- **Bundle Optimization**: Separate builds for client and server
+### Otimização de Performance
+- **Lazy Loading**: Code splitting e lazy loading a nível de componente
+- **Otimização de Imagens**: Suporte a formato WebP com fallbacks
+- **Cache**: Cache de queries com TanStack Query
+- **Otimização de Bundle**: Builds separados para cliente e servidor
 
-## Data Flow
+## Fluxo de Dados
 
-1. **Client Requests**: React frontend makes API calls through TanStack Query
-2. **Authentication**: Middleware validates sessions/JWT tokens
-3. **Database Operations**: Drizzle ORM handles type-safe database interactions
-4. **Response Processing**: Express middleware formats and logs responses
-5. **Error Handling**: Centralized error handling with proper HTTP status codes
+1. **Requisições do Cliente**: Frontend React faz chamadas de API através do TanStack Query
+2. **Autenticação**: Middleware valida sessões/tokens JWT
+3. **Operações de Banco de Dados**: Drizzle ORM manipula interações type-safe com o banco
+4. **Processamento de Resposta**: Middleware Express formata e registra respostas
+5. **Tratamento de Erros**: Tratamento centralizado de erros com códigos HTTP adequados
 
-## External Dependencies
+## Dependências Externas
 
-### Core Dependencies
-- **@radix-ui/react-***: Accessible UI components
-- **framer-motion**: Animation library
-- **drizzle-orm**: Type-safe ORM
-- **express**: Web framework
-- **bcrypt**: Password hashing
-- **jsonwebtoken**: JWT authentication
+### Dependências Principais
+- **@radix-ui/react-***: Componentes UI acessíveis
+- **framer-motion**: Biblioteca de animação
+- **drizzle-orm**: ORM type-safe
+- **express**: Framework web
+- **bcrypt**: Hash de senhas
+- **jsonwebtoken**: Autenticação JWT
 
-### Development Dependencies
-- **vite**: Build tool and dev server
-- **typescript**: Type checking
-- **tailwindcss**: Utility-first CSS framework
-- **esbuild**: Fast JavaScript bundler
+### Dependências de Desenvolvimento
+- **vite**: Ferramenta de build e servidor de desenvolvimento
+- **typescript**: Verificação de tipos
+- **tailwindcss**: Framework CSS utility-first
+- **esbuild**: Bundler JavaScript rápido
 
-### Cloud Services
-- **Supabase**: PostgreSQL database hosting with built-in auth and real-time features
-- **Vercel**: Serverless deployment platform
+### Serviços em Nuvem
+- **Supabase**: Hospedagem de banco PostgreSQL com auth integrado e recursos real-time
+- **Vercel**: Plataforma de deployment serverless
 
-## Deployment Strategy
+## Estratégia de Deployment
 
-### Vercel Deployment
-- **Functions**: Serverless functions for API routes
-- **Static Assets**: Optimized static file serving
-- **Environment Variables**: Secure configuration management
-- **Build Process**: Dual build system (Vite for frontend, esbuild for backend)
+### Deployment Vercel
+- **Funções**: Funções serverless para rotas de API
+- **Assets Estáticos**: Servimento otimizado de arquivos estáticos
+- **Variáveis de Ambiente**: Gerenciamento seguro de configuração
+- **Processo de Build**: Sistema de build duplo (Vite para frontend, esbuild para backend)
 
-### Configuration Files
-- `vercel.json`: Deployment configuration with rewrites and functions
-- `build-vercel.js`: Custom build script for Vercel compatibility
-- `tsconfig.vercel.json`: TypeScript configuration for serverless environment
+### Arquivos de Configuração
+- `vercel.json`: Configuração de deployment com rewrites e funções
+- `build-vercel.js`: Script de build customizado para compatibilidade Vercel
+- `tsconfig.vercel.json`: Configuração TypeScript para ambiente serverless
 
-### Error Resolution
-- **Module Resolution**: Fixed ES module imports for Vercel compatibility
-- **Session Handling**: Implemented fallback strategies for serverless environments
-- **Build Optimization**: External dependencies properly configured for serverless
+### Resolução de Erros
+- **Resolução de Módulos**: Imports de módulos ES corrigidos para compatibilidade Vercel
+- **Tratamento de Sessão**: Estratégias de fallback implementadas para ambientes serverless
+- **Otimização de Build**: Dependências externas configuradas adequadamente para serverless
 
-## Changelog
+## Funcionalidades Implementadas
 
-- June 15, 2025: Successfully migrated to Supabase database
-- June 15, 2025: Updated database schema to match Supabase structure
-- June 15, 2025: Configured Supabase authentication system
-- June 15, 2025: Removed all Neon dependencies and migrated to DATABASE_URL configuration
-- June 15, 2025: Application seeding working correctly with Supabase
-- June 15, 2025: **Supabase authentication system fully operational** - Frontend and backend properly configured with API keys
-- June 15, 2025: **Fixed login redirect system** - Implemented role-based authentication redirects (regular users → dashboard, admin users → admin panel)
-- June 15, 2025: **Supabase database connection established** - Database seeding successful with complete integration
-- June 20, 2025: **Fan Gallery system fully functional with Supabase** - All CRUD operations working correctly with proper authentication and database integration
-- June 20, 2025: **Contact form system fully operational** - Fixed frontend validation, removed authentication requirement for public access, corrected API calls and field mapping
+### Hero Section com Vídeo
+- **Vídeo de Fundo**: Implementado com vídeo enviado pelo usuário (.mov convertido para MP4)
+- **Loop Infinito**: Sistema robusto de reprodução automática em loop
+- **Otimização**: Múltiplos formatos para compatibilidade máxima (MP4 H.264 baseline, MP4 padrão, MOV original)
+- **Controles JavaScript**: Controles customizados para garantir reprodução contínua
 
-## User Preferences
+### Sistema de Contato
+- **Formulário Completo**: Nome, email, telefone e mensagem
+- **Validação em Tempo Real**: Mensagens de erro específicas em português
+- **Armazenamento**: Mensagens salvas no banco PostgreSQL
+- **Status de Mensagens**: Sistema de status para organização administrativa
 
-Preferred communication style: Simple, everyday language.
+### Banco de Dados
+- **PostgreSQL Configurado**: Todas as tabelas criadas com sucesso
+- **Schema Completo**: Tabelas para usuários, produtos, pedidos, mensagens de contato, analytics e fotos de fãs
+- **Relações Definidas**: Relacionamentos adequados entre tabelas usando Drizzle ORM
+
+## Registro de Mudanças
+
+- 15 de Junho, 2025: Migração bem-sucedida para banco Supabase
+- 15 de Junho, 2025: Schema do banco atualizado para estrutura Supabase
+- 15 de Junho, 2025: Sistema de autenticação Supabase configurado
+- 15 de Junho, 2025: Removidas todas as dependências Neon e migrado para configuração DATABASE_URL
+- 15 de Junho, 2025: Seeding da aplicação funcionando corretamente com Supabase
+- 15 de Junho, 2025: **Sistema de autenticação Supabase totalmente operacional** - Frontend e backend configurados adequadamente com chaves API
+- 15 de Junho, 2025: **Sistema de redirecionamento de login corrigido** - Implementados redirecionamentos baseados em roles (usuários regulares → dashboard, usuários admin → painel admin)
+- 15 de Junho, 2025: **Conexão com banco Supabase estabelecida** - Seeding do banco bem-sucedido com integração completa
+- 20 de Junho, 2025: **Sistema Fan Gallery totalmente funcional com Supabase** - Todas as operações CRUD funcionando corretamente com autenticação adequada e integração com banco
+- 20 de Junho, 2025: **Sistema de formulário de contato totalmente operacional** - Validação frontend corrigida, removido requisito de autenticação para acesso público, corrigidas chamadas API e mapeamento de campos
+- 20 de Junho, 2025: **Hero Section com vídeo implementado** - Substituída animação 3D por vídeo de fundo em loop infinito, otimizado para múltiplos formatos
+
+## Preferências do Usuário
+
+- **Estilo de Comunicação**: Linguagem simples e cotidiana em português
+- **Documentação**: Toda documentação deve estar em português
+- **Design**: Preferência por vídeo de fundo no hero ao invés de animações 3D
+- **Validação**: Validação em tempo real com mensagens específicas em português
